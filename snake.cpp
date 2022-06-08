@@ -277,7 +277,8 @@ void helpscreen()   //Main Menu
     cin>>choice;
     if(choice==2)   //Instructions
     {   system("clear");
-        cout<<"CONTROLS\nPRESS\n 5 TO MOVE UPWARD\n 2 TO MOVE DOWNWARDS \n 3 TO MOVE RIGHT \n 4 TO MOVE LEFT";
+        cout<<"CONTROLS\nPRESS\n 5 TO MOVE UPWARD\n 2 TO MOVE DOWNWARDS \n 3 TO MOVE RIGHT \n 1 TO MOVE LEFT";
+      cout<<"\Press 3 to start the game";
         
         cout<<"\n Press any key to continue";
         cin>>choice;
