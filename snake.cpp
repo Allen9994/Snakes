@@ -95,6 +95,7 @@ void kill(int value) //Converts user input to the direction snake must move and 
         a[i]=i;
         
         calc(i);
+        
     }else
     if(value==2)
     {
@@ -118,6 +119,7 @@ void kill(int value) //Converts user input to the direction snake must move and 
         
         calc(i); 
     }
+    
 }
 void calc(int n)   //Brain of the program. Entire game operation happens here. 
 {
@@ -155,24 +157,23 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
     static int x[10][10] = {0};
     p=b[g];q=b[g-1];  //For identifying the previous position and the new position of the snake
     
-    
-            if(p==q+1)
-            {   
-                a[a[n]-1]=1;
-                a[a[n]]=6;
-            }else if(p==q-1)
-            {
-                a[a[n]+1]=2;
-                a[a[n]]=7;
-            }else if(p/10==(q/10)+1)
-            {
-                a[a[n]-10]=3;
-                a[a[n]]=8;
-            }else if(p/10==(q/10)-1)
-            {
-                a[a[n]+10]=4;
-                a[a[n]]=9;
-            }
+        if(p==q+1)
+        {   
+            a[a[n]-1]=1;
+            a[a[n]]=6;
+        }else if(p==q-1)
+        {
+            a[a[n]+1]=2;
+            a[a[n]]=7;
+        }else if(p/10==(q/10)+1)
+        {
+            a[a[n]-10]=3;
+            a[a[n]]=8;
+        }else if(p/10==(q/10)-1)
+        {
+            a[a[n]+10]=4;
+            a[a[n]]=9;
+        }
         
     
     a[w]=5; //The point which determines the score and increments the length of the snake 
@@ -212,6 +213,10 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
             if(j==9||j==0)
             {
                 cout<<"|";
+            }
+            if(i == 9 && j==9)
+            {
+                cout<<"\n‾‾‾‾‾‾‾‾‾‾‾";
             }
            if(x[i][j]==0)
             {
