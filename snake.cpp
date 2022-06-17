@@ -205,7 +205,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
                 lame(score,420);
             }
         }
-    }cout<<"__________"<<endl;
+    }cout<<" _________"<<endl;
     for (i=0;i<10;i++)  //Designing the 2Dmodel : Borders not made yet
     {   
         for (j=0;j<10;j++)
@@ -216,7 +216,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
             }
             if(i == 9 && j==9)
             {
-                cout<<"\n‾‾‾‾‾‾‾‾‾‾‾";
+                cout<<"\n ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞";
             }
            if(x[i][j]==0)
             {
