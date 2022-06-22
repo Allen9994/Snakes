@@ -1,3 +1,4 @@
+//Start of the program
 #ifdef _WIN32
 #include <Windows.h>
 #else
@@ -36,8 +37,6 @@ int randomz(int poll)
     return p[poll];
 }
 
-
-
 void read_value() //inputting value from user
 {   
   int c=0;
@@ -70,7 +69,7 @@ tcsetattr to change attributes immediately. */
   
     cv.notify_one();
 }
-void takin() //function to accept the value parallelly while game is proceeding.  
+void take_input() //function to accept the value parallelly while game is proceeding.  
 {
     thread th(read_value);
 
@@ -117,20 +116,21 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
 {
     system("clear");
     int i ;
-    static int tr=0,flag=0,w=0;
+    static int tr=0,w=0;
+    static bool flag=false;
     if(tr!=score)
     {
-        flag=0;
+        flag=false;
     }
     tr=score;
-    if(flag==0)
+    if(flag==false)
     {
         w=randomz(score);
         if((w+1)%10 == 0)
         {
             w++;
         }
-        flag++;
+        flag = true;
     }
     if(n>99||n<0)
     {
@@ -222,12 +222,12 @@ void lame(int sc,int k) //To exit the game when the snake bites itself
 {   
     do{
         if(k==420)
-    {
-        cout<<"LOST";
-        cout<<"\nScore:"<<sc;
-        exit(0);
-    }
-        takin();
+        {
+            cout<<"LOST";
+            cout<<"\nScore:"<<sc;
+            exit(0);
+        }
+        take_input();
         
     }while(1);
 }
@@ -246,5 +246,4 @@ void helpscreen()   //Main Menu
         cout<<"\n Press any key to continue";
         cin>>choice;
     }
-    
 }
