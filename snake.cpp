@@ -4,13 +4,11 @@
 #include <unistd.h>
 #endif
 #include <iostream>
-#include <cstdlib>
 #include <chrono>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include<stdlib.h>
-#include<stdio.h>
 #include <termios.h> //termios, TCSANOW, ECHO, ICANON
 #include <unistd.h> 
 #include <time.h>
@@ -33,7 +31,7 @@ int randomz(int poll)
     srand((unsigned) time(0));
     int p[99];
     for (int index = 0; index < 50; index++) {
-        p[index] = (rand() % 98) + 1;
+        p[index] = (rand() % 99) + 1;
     }
     return p[poll];
 }
@@ -199,6 +197,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
             {
                 cout<<"\n ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞";
             }
+            
             switch(h[(j*10)+i])
             {
                 case '<': cout<<"◀"; break;
@@ -208,7 +207,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
                 case '|': cout<<"∥"; break;
                 default : cout<<h[(j*10)+i];
             }
-
+            
         }cout<<endl;
     }
 }
