@@ -11,29 +11,30 @@
 #include <condition_variable>
 #include<stdlib.h>
 #include<stdio.h>
- #include <termios.h> //termios, TCSANOW, ECHO, ICANON
- #include <unistd.h> 
+#include <termios.h> //termios, TCSANOW, ECHO, ICANON
+#include <unistd.h> 
 #include <time.h>
 
 static int score=0;
 int a[100] = {0};
-using namespace std;
 
+using namespace std;
+string h = "                                                                                                    ";
 
 condition_variable cv;
 void kill(int);
 void lame(int,int);
-static int value = 3;
+int value = 3;
 void calc(int);
 void helpscreen();
 
 int randomz(int poll)
 {   
     srand((unsigned) time(0));
-  int p[100];
-  for (int index = 0; index < 50; index++) {
-    p[index] = (rand() % 100) + 1;
-}
+    int p[99];
+    for (int index = 0; index < 50; index++) {
+        p[index] = (rand() % 98) + 1;
+    }
     return p[poll];
 }
 
@@ -41,8 +42,6 @@ int randomz(int poll)
 
 void read_value() //inputting value from user
 {   
-
-  
   int c=0;
  static struct termios oldt, newt;
 
@@ -66,7 +65,6 @@ tcsetattr to change attributes immediately. */
     if(c == '2' || c == '1' || c == '3' || c == '5' )
     {
         value =  (int)c - 48;
-        cout<<value;
     }
 
  /* restore the old settings */
@@ -83,9 +81,7 @@ void takin() //function to accept the value parallelly while game is proceeding.
     while (cv.wait_for(lck, chrono::milliseconds(400)) == cv_status::timeout)
     {
         kill(value);
-        
     }
-
     th.join();
 
     kill(value);
@@ -97,15 +93,12 @@ void kill(int value) //Converts user input to the direction snake must move and 
     {   
         i++;
         a[i]=i;
-        
         calc(i);
-        
     }else
     if(value==2)
     {
         i+=10;
         a[i]=i;
-        
         calc(i); 
     }
     else
@@ -113,23 +106,19 @@ void kill(int value) //Converts user input to the direction snake must move and 
     {
         i--;
         a[i]=i;
-        
         calc(i); 
     }else
     if(value==5)
     {
         i-=10;
         a[i]=i;
-        
         calc(i); 
     }
-    
 }
 void calc(int n)   //Brain of the program. Entire game operation happens here. 
 {
     system("clear");
     int i ;
-    
     static int tr=0,flag=0,w=0;
     if(tr!=score)
     {
@@ -143,44 +132,38 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
         {
             w++;
         }
-        
-        
         flag++;
     }
-    
     if(n>99||n<0)
     {
         lame(score,420);
     }
-    
     static int g=0,t=0,s=0,b[1000];
     int j,z=0,p,q;
     
     g++;
     b[g]=a[n]; //Storing the values to another array
-    static int x[10][10] = {0};
     p=b[g];q=b[g-1];  //For identifying the previous position and the new position of the snake
     
         if(p==q+1)
         {   
-            a[a[n]-1]=1;
-            a[a[n]]=6;
+            h[a[n]-1]= '=';
+            h[a[n]]= '>';
         }else if(p==q-1)
         {
-            a[a[n]+1]=2;
-            a[a[n]]=7;
+            h[a[n]+1]= '=';
+            h[a[n]]= '<';
         }else if(p/10==(q/10)+1)
         {
-            a[a[n]-10]=3;
-            a[a[n]]=8;
+            h[a[n]-10]= '|';
+            h[a[n]]= 'v';
         }else if(p/10==(q/10)-1)
         {
-            a[a[n]+10]=4;
-            a[a[n]]=9;
+            h[a[n]+10]= '|';
+            h[a[n]]= '^';
         }
         
-    
-    a[w]=5; //The point which determines the score and increments the length of the snake 
+    h[w]='+'; //The point which determines the score and increments the length of the snake 
     if(n==w)    
     {
         score++;
@@ -189,7 +172,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
     if(g>4-score)       //For shortening the snake length dynamically
     {   
        s=b[g-4-score];
-       a[s]=0;
+       h[s]= ' ';
     }
     for(i=g-4-score;i<g;i++)
     {
@@ -198,23 +181,17 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
             lame(score,420);    
         }
     }
-    for (i=0;i<10;i++)  //converting 1D array of snake's movements into 2D array 
+    cout<<" _________"<<endl;
+    for (j=0;j<10;j++)  //Designing the 2Dmodel : Borders not made yet
     {   
-        for (j=0;j<10;j++)
+        for (i=0;i<10;i++)
         {
-            z=i*10+j;
-            x[i][j]=a[z];
-            if(x[i][0]==2||x[i][9]==6)
+            if(h[(j*10)+i] == '>' && i == 9 || h[(j*10)+i] == '<' && i == 9)
             {
+                system("clear");
                 lame(score,420);
             }
-        }
-    }cout<<" _________"<<endl;
-    for (i=0;i<10;i++)  //Designing the 2Dmodel : Borders not made yet
-    {   
-        for (j=0;j<10;j++)
-        {
-            if(j==9||j==0)
+            if(i==9||i==0)
             {
                 cout<<"|";
             }
@@ -222,40 +199,18 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
             {
                 cout<<"\n ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞";
             }
-           if(x[i][j]==0)
+            switch(h[(j*10)+i])
             {
-                cout<<" ";
-            } else 
-            
-                if(x[i][j]==1||x[i][j]==2)
-                {
-                    cout<<"=";
-                }else
-                if(x[i][j]==6)
-                {
-                    cout<<"▶";
-                }else
-                if(x[i][j]==7)
-                {
-                    cout<<"◀";
-                }else
-                if(x[i][j]==8)
-                {
-                    cout<<"▼";
-                }else
-                if(x[i][j]==9)
-                {
-                    cout<<"▲";
-                }else
-                if(x[i][j]==5)
-                {
-                    cout<<"+";
-                }else 
-                if(x[i][j]==3||x[i][j]==4)
-                    cout<<"∥";
-            }cout<<endl;
+                case '<': cout<<"◀"; break;
+                case '>': cout<<"▶"; break;
+                case '^': cout<<"▲"; break;
+                case 'v': cout<<"▼"; break;
+                case '|': cout<<"∥"; break;
+                default : cout<<h[(j*10)+i];
+            }
+
+        }cout<<endl;
     }
-    
 }
 
 int main()  
@@ -266,7 +221,6 @@ int main()
 }
 void lame(int sc,int k) //To exit the game when the snake bites itself
 {   
-    int a=0;
     do{
         if(k==420)
     {
@@ -276,7 +230,7 @@ void lame(int sc,int k) //To exit the game when the snake bites itself
     }
         takin();
         
-    }while(a<200);
+    }while(1);
 }
 void helpscreen()   //Main Menu
 {   
@@ -285,9 +239,10 @@ void helpscreen()   //Main Menu
     cout<<"Press:\n1 to Play\n2 for Help";
     cin>>choice;
     if(choice==2)   //Instructions
-    {   system("clear");
+    {   
+        system("clear");
         cout<<"CONTROLS\nPRESS\n 5 TO MOVE UPWARD\n 2 TO MOVE DOWNWARDS \n 3 TO MOVE RIGHT \n 1 TO MOVE LEFT";
-      cout<<"\n Press 3 to start the game";
+        cout<<"\n Press 3 to start the game";
         
         cout<<"\n Press any key to continue";
         cin>>choice;
