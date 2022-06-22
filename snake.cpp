@@ -63,7 +63,11 @@ tcsetattr to change attributes immediately. */
  tcsetattr( STDIN_FILENO, TCSANOW, &newt);
  
     c = getchar();
-    value =  (int)c - 48;;
+    if(c == '2' || c == '1' || c == '3' || c == '5' )
+    {
+        value =  (int)c - 48;
+        cout<<value;
+    }
 
  /* restore the old settings */
  tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
