@@ -184,7 +184,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
     {   
         for (i=0;i<10;i++)
         {
-            if(h[(j*10)+i] == '>' && i == 9 || h[(j*10)+i] == '<' && i == 9)
+            if((h[(j*10)+i] == '>' && i == 9) || (h[(j*10)+i] == '<' && i == 9))
             {
                 system("clear");
                 lame(score,420);
