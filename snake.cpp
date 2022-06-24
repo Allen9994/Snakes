@@ -206,7 +206,13 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
             }
             if(i==9||i==0)
             {
+                if(level == 1)
+                {
+                    cout<<":";
+                }
+                else if(level == 2){
                 cout<<"|";
+                }
             }
             if(i == 9 && j==9)
             {
