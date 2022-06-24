@@ -16,8 +16,9 @@
 
 int score = 0;
 static int points = 0;
-int a[100] = {0};
 int speed = 400;
+int level=2;
+int a[100] = {0};
 using namespace std;
 string h = "                                                                                                    ";
 
@@ -25,6 +26,7 @@ condition_variable cv;
 void kill(int);
 void lame(int,int);
 int value = 3;
+int f = 0;
 void calc(int);
 void helpscreen();
 
@@ -86,31 +88,26 @@ void take_input() //function to accept the value parallelly while game is procee
 }
 void kill(int value) //Converts user input to the direction snake must move and stores all the movements into the array
 {   
-    static int i=0;
     if(value==3)
     {   
-        i++;
-        a[i]=i;
-        calc(i);
+        f++;
+        calc(f);
     }else
     if(value==2)
     {
-        i+=10;
-        a[i]=i;
-        calc(i); 
+        f+=10;
+        calc(f); 
     }
     else
     if(value==1)
     {
-        i--;
-        a[i]=i;
-        calc(i); 
+        f--;
+        calc(f); 
     }else
     if(value==5)
     {
-        i-=10;
-        a[i]=i;
-        calc(i); 
+        f-=10;
+        calc(f); 
     }
 }
 void calc(int n)   //Brain of the program. Entire game operation happens here. 
@@ -141,25 +138,25 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
     int j,z=0,p,q;
     
     g++;
-    b[g]=a[n]; //Storing the values to another array
+    b[g]=n; //Storing the values to another array
     p=b[g];q=b[g-1];  //For identifying the previous position and the new position of the snake
     
         if(p==q+1)
         {   
-            h[a[n]-1]= '=';
-            h[a[n]]= '>';
+            h[n-1]= '=';
+            h[n]= '>';
         }else if(p==q-1)
         {
-            h[a[n]+1]= '=';
-            h[a[n]]= '<';
+            h[n+1]= '=';
+            h[n]= '<';
         }else if(p/10==(q/10)+1)
         {
-            h[a[n]-10]= '|';
-            h[a[n]]= 'v';
+            h[n-10]= '|';
+            h[n]= 'v';
         }else if(p/10==(q/10)-1)
         {
-            h[a[n]+10]= '|';
-            h[a[n]]= '^';
+            h[n+10]= '|';
+            h[n]= '^';
         }
         
     h[w]='+'; //The point which determines the score and increments the length of the snake 
@@ -167,9 +164,9 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
     {
         switch(speed)
         {
-            case 500:points++;break;
-            case 400:points = points + 2;break;
-            case 300:points = points + 3;break;
+            case 500:points = points + 1*level;break;
+            case 400:points = points + 2*level;break;
+            case 300:points = points + 3*level;break;
         }score++;
         cout<<"\a";
     }
@@ -190,10 +187,22 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
     {   
         for (i=0;i<10;i++)
         {
-            if((h[(j*10)+i] == '>' && i == 9) || (h[(j*10)+i] == '<' && i == 9))
+            if(level == 2)
             {
-                system("clear");
-                lame(points,420);
+                if((h[(j*10)+i] == '>' && i == 9) || (h[(j*10)+i] == '<' && i == 9))
+                {
+                    system("clear");
+                        lame(points,420);
+                }
+            }
+            else{
+                if(h[(j*10)+i] == '<' && i == 9)    
+                    f = f + 11;
+                else
+                if(h[(j*10)+i] == '>' && i == 9)
+                {
+                    f = f - 11;
+                }
             }
             if(i==9||i==0)
             {
@@ -257,6 +266,16 @@ void helpscreen()   //Main Menu
         system("clear");
         cout<<"Control the Snake Speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard";
         cin>>speed;
+        cout<<"Control the Game Difficulty level.\n1 : LEVEL 1\n2 : LEVEL 2";
+        cin>>level;
+        if(level == 1)
+        {
+            level = 1;
+        }
+        else
+        {
+            level = 2;
+        }
         if(speed == 1)
         {
             speed = 500;
