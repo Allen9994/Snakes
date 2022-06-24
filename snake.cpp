@@ -14,9 +14,10 @@
 #include <unistd.h> 
 #include <time.h>
 
-static int score=0;
+int score = 0;
+static int points = 0;
 int a[100] = {0};
-
+int speed = 400;
 using namespace std;
 string h = "                                                                                                    ";
 
@@ -75,7 +76,7 @@ void take_input() //function to accept the value parallelly while game is procee
 
     mutex mtx;
     unique_lock<mutex> lck(mtx);
-    while (cv.wait_for(lck, chrono::milliseconds(400)) == cv_status::timeout)
+    while (cv.wait_for(lck, chrono::milliseconds(speed)) == cv_status::timeout)
     {
         kill(value);
     }
@@ -134,7 +135,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
     }
     if(n>99||n<0)
     {
-        lame(score,420);
+        lame(points,420);
     }
     static int g=0,t=0,s=0,b[1000];
     int j,z=0,p,q;
@@ -164,7 +165,12 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
     h[w]='+'; //The point which determines the score and increments the length of the snake 
     if(n==w)    
     {
-        score++;
+        switch(speed)
+        {
+            case 500:points++;break;
+            case 400:points = points + 2;break;
+            case 300:points = points + 3;break;
+        }score++;
         cout<<"\a";
     }
     if(g>4-score)       //For shortening the snake length dynamically
@@ -176,7 +182,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
     {
         if(b[i]==b[g])  //When the snake bites itself
         {
-            lame(score,420);    
+            lame(points,420); 
         }
     }
     cout<<" _________"<<endl;
@@ -187,7 +193,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
             if((h[(j*10)+i] == '>' && i == 9) || (h[(j*10)+i] == '<' && i == 9))
             {
                 system("clear");
-                lame(score,420);
+                lame(points,420);
             }
             if(i==9||i==0)
             {
@@ -235,7 +241,7 @@ void helpscreen()   //Main Menu
 {   
     int choice=48;
     cout<<"Welcome to the game!\nCreated by Allen\n";
-    cout<<"Press:\n1 to Play\n2 for Help";
+    cout<<"Press:\n1 to Play\n2 for Help\n3 for Game Settings";
     cin>>choice;
     if(choice==2)   //Instructions
     {   
@@ -245,5 +251,19 @@ void helpscreen()   //Main Menu
         
         cout<<"\n Press any key to continue";
         cin>>choice;
+    }
+    if (choice == 3)
+    {
+        system("clear");
+        cout<<"Control the Snake Speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard";
+        cin>>speed;
+        if(speed == 1)
+        {
+            speed = 500;
+        }
+        else if (speed == 2)
+        {
+            speed = 400;
+        }else{speed = 300;}
     }
 }
