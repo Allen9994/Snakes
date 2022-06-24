@@ -130,9 +130,22 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
         }
         flag = true;
     }
-    if(n>99||n<0)
+    if(level == 1)
     {
-        lame(points,420);
+        if(n>99)
+        {
+            n = n - 100;
+        }else if(n<0)
+        {
+            n = n + 100;
+        }
+    }
+    if(level == 2)
+    {
+        if(n>99||n<0)
+        {
+            lame(points,420);
+        }
     }
     static int g=0,t=0,s=0,b[1000];
     int j,z=0,p,q;
