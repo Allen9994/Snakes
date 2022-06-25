@@ -62,10 +62,17 @@ tcsetattr to change attributes immediately. */
  tcsetattr( STDIN_FILENO, TCSANOW, &newt);
  
     c = getchar();
-    if(c == '2' || c == '1' || c == '3' || c == '5' )
-    {
-        value =  (int)c - 48;
-    }
+    switch(c)
+      {
+        case 'w': value = (int)c - 114;break;
+        case 's': value = (int)c - 113;break;
+        case 'd': value = (int)c - 97;break;
+        case 'a': value = (int)c - 96;break;
+        case '1': value =  (int)c - 48;break;
+        case '2': value =  (int)c - 48;break;
+        case '3': value =  (int)c - 48;break;
+        case '4': value =  (int)c - 48;break;  
+      }
 
  /* restore the old settings */
  tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
@@ -274,7 +281,7 @@ void helpscreen()   //Main Menu
     if(choice==2)   //Instructions
     {   
         system("clear");
-        cout<<"CONTROLS\nPRESS\n 5 TO MOVE UPWARD\n 2 TO MOVE DOWNWARDS \n 3 TO MOVE RIGHT \n 1 TO MOVE LEFT";
+        cout<<"CONTROLS\nPRESS\n 5 or w TO MOVE UPWARD\n 2 or s TO MOVE DOWNWARDS \n 3 or d TO MOVE RIGHT \n 1 or a TO MOVE LEFT";
         cout<<"\n Press 3 to start the game";
         
         cout<<"\n Press any key to continue";
@@ -285,7 +292,7 @@ void helpscreen()   //Main Menu
         system("clear");
         cout<<"Control the Snake Speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard";
         cin>>speed;
-        cout<<"Control the Game Difficulty level.\n1 : LEVEL 1\n2 : LEVEL 2";
+        cout<<"Control the Game Difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2";
         cin>>level;
         if(level == 1)
         {
