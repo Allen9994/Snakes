@@ -71,7 +71,7 @@ tcsetattr to change attributes immediately. */
         case '1': value =  (int)c - 48;break;
         case '2': value =  (int)c - 48;break;
         case '3': value =  (int)c - 48;break;
-        case '4': value =  (int)c - 48;break;  
+        case '5': value =  (int)c - 48;break;  
       }
 
  /* restore the old settings */
