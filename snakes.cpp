@@ -254,8 +254,7 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
 }
 
 int main()  
-{
-    
+{ 
     helpscreen();
     lame(0,0);
 }
@@ -294,14 +293,7 @@ void helpscreen()   //Main Menu
         cin>>speed;
         cout<<"Control the Game Difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2";
         cin>>level;
-        if(level == 1)
-        {
-            level = 1;
-        }
-        else
-        {
-            level = 2;
-        }
+        level = (level == 1) ? 1 : 2;
         if(speed == 1)
         {
             speed = 500;
