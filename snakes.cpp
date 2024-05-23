@@ -13,28 +13,26 @@
 #include <termios.h> //termios, TCSANOW, ECHO, ICANON
 #include <unistd.h> 
 #include <time.h>
-
-int score = 0;
-static int points = 0;
-int speed = 400;
-int level=2;
-int a[100] = {0};
 using namespace std;
+
+short score = 0;
+static short points = 0;
+short speed = 400, level = 2, value = 3, pace = 2, f = 0;
+short a[100] = {0};
 string h = "                                                                                                    ";
 
 condition_variable cv;
-void kill(int);
-void lame(int,int);
-int value = 3;
-int f = 0;
-void calc(int);
-void helpscreen();
+void control(short);
+void gameOver(short,short);
+void calc(short);
+void mainMenu();
 
-int randomz(int poll)
+short randomize(short poll)
 {   
     srand((unsigned) time(0));
-    int p[99];
-    for (int index = 0; index < 50; index++) {
+    short p[99];
+    for (short index = 0; index < 50; index++) 
+    {
         p[index] = (rand() % 99) + 1;
     }
     return p[poll];
@@ -42,7 +40,6 @@ int randomz(int poll)
 
 void read_value() //inputting value from user
 {   
-  int c=0;
  static struct termios oldt, newt;
 
  /* tcgetattr gets the parametervas of the current terminal
@@ -61,18 +58,18 @@ or an EOL */
 tcsetattr to change attributes immediately. */
  tcsetattr( STDIN_FILENO, TCSANOW, &newt);
  
-    c = getchar();
+    char c = getchar();
     switch(c)
-      {
+    {
         case 'w': value = (int)c - 114;break;
         case 's': value = (int)c - 113;break;
         case 'd': value = (int)c - 97;break;
         case 'a': value = (int)c - 96;break;
-        case '1': value =  (int)c - 48;break;
-        case '2': value =  (int)c - 48;break;
-        case '3': value =  (int)c - 48;break;
-        case '5': value =  (int)c - 48;break;  
-      }
+        case '1': value = (int)c - 48;break;
+        case '2': value = (int)c - 48;break;
+        case '3': value = (int)c - 48;break;
+        case '5': value = (int)c - 48;break;  
+    }
 
  /* restore the old settings */
  tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
@@ -82,162 +79,114 @@ tcsetattr to change attributes immediately. */
 void take_input() //function to accept the value parallelly while game is proceeding.  
 {
     thread th(read_value);
-
     mutex mtx;
     unique_lock<mutex> lck(mtx);
     while (cv.wait_for(lck, chrono::milliseconds(speed)) == cv_status::timeout)
     {
-        kill(value);
+        control(value);
     }
     th.join();
 
-    kill(value);
+    control(value);
 }
-void kill(int value) //Converts user input to the direction snake must move and stores all the movements into the array
+void control(short value) //Converts user input to the direction snake must move and stores all the movements into the array
 {   
-    if(value==3)
-    {   
-        f++;
-        calc(f);
-    }else
-    if(value==2)
-    {
-        f+=10;
-        calc(f); 
+    switch(value)
+    {      
+        case 3: f++;    break;
+        case 2: f+=10;  break;
+        case 1: f--;    break;
+        case 5: f-=10;  break;
     }
-    else
-    if(value==1)
-    {
-        f--;
-        calc(f); 
-    }else
-    if(value==5)
-    {
-        f-=10;
-        calc(f); 
-    }
+    calc(f);
 }
-void calc(int n)   //Brain of the program. Entire game operation happens here. 
+void calc(short n)   //Brain of the program. Entire game operation happens here. 
 {
     system("clear");
-    int i ;
-    static int tr=0,w=0;
+    short i;
+    static short tr=0,w=0;
     static bool flag=false;
-    if(tr!=score)
-    {
-        flag=false;
-    }
+    if(tr != score) flag=false;
     tr=score;
-    if(flag==false)
+    if(!flag)
     {
-        w=randomz(score);
-        if((w+1)%10 == 0)
-        {
-            w++;
-        }
+        w=randomize(score);
+        if((w+1)%10 == 0) w++;
         flag = true;
     }
     if(level == 1)
     {
-        if(n>99)
-        {
-            n = n - 100;
-        }else if(n<0)
-        {
-            n = n + 100;
-        }
+        if(n>99)    n -= 100;
+        else if(n<0)n += 100;
     }
     if(level == 2)
     {
-        if(n>99||n<0)
-        {
-            lame(points,420);
-        }
+        if(n>99||n<0) gameOver(points,420);
     }
-    static int g=0,t=0,s=0,b[1000];
-    int j,z=0,p,q;
+    static short g=0,t=0,j=0,p=0,q=0,b[1000];
+
+    b[++g] = n; //Storing the values to another array
+    p = b[g];
+    q = b[g-1];  //For identifying the previous position and the new position of the snake
     
-    g++;
-    b[g]=n; //Storing the values to another array
-    p=b[g];q=b[g-1];  //For identifying the previous position and the new position of the snake
-    
-        if(p==q+1)
-        {   
-            h[n-1]= '=';
-            h[n]= '>';
-        }else if(p==q-1)
-        {
-            h[n+1]= '=';
-            h[n]= '<';
-        }else if(p/10==(q/10)+1)
-        {
-            h[n-10]= '|';
-            h[n]= 'v';
-        }else if(p/10==(q/10)-1)
-        {
-            h[n+10]= '|';
-            h[n]= '^';
-        }
+    if(p == q+1)
+    {   
+        h[n-1]= '=';
+        h[n]= '>';
+    }else 
+    if(p == q-1)
+    {
+        h[n+1]= '=';
+        h[n]= '<';
+    }else 
+    if(p/10 == (q/10)+1)
+    {
+        h[n-10]= '|';
+        h[n]= 'v';
+    }else 
+    if(p/10 ==(q/10)-1)
+    {
+        h[n+10]= '|';
+        h[n]= '^';
+    }
         
     h[w]='+'; //The point which determines the score and increments the length of the snake 
-    if(n==w)    
+    if(n == w)    
     {
-        switch(speed)
-        {
-            case 500:points = points + 1*level;break;
-            case 400:points = points + 2*level;break;
-            case 300:points = points + 3*level;break;
-        }score++;
         cout<<"\a";
+        points += pace*level;
+        score++;
     }
-    if(g>4-score)       //For shortening the snake length dynamically
-    {   
-       s=b[g-4-score];
-       h[s]= ' ';
-    }
+    if(g > 4-score) h[b[g-4-score]]= ' ';      //For shortening the snake length dynamically
+       
     for(i=g-4-score;i<g;i++)
     {
-        if(b[i]==b[g])  //When the snake bites itself
-        {
-            lame(points,420); 
-        }
+        if(b[i] == b[g])  gameOver(points,420);  //When the snake bites itself
     }
+    
     cout<<" _________"<<endl;
+    
     for (j=0;j<10;j++)  //Designing the 2Dmodel : Borders not made yet
     {   
         for (i=0;i<10;i++)
         {
             if(level == 2)
             {
-                if((h[(j*10)+i] == '>' && i == 9) || (h[(j*10)+i] == '<' && i == 9))
-                {
-                    system("clear");
-                        lame(points,420);
+                if((h[(j*10)+i] == '>' && i == 9) || (h[(j*10)+i] == '<' && i == 9)){
+                    gameOver(points,420);
                 }
             }
-            else{
-                if(h[(j*10)+i] == '<' && i == 9)    
-                    f = f + 11;
-                else
-                if(h[(j*10)+i] == '>' && i == 9)
-                {
-                    f = f - 11;
-                }
-            }
-            if(i==9||i==0)
+            else
             {
-                if(level == 1)
-                {
-                    cout<<":";
-                }
-                else if(level == 2){
-                cout<<"|";
-                }
+                if(h[(j*10)+i] == '<' && i == 9)        f += 11;
+                else if(h[(j*10)+i] == '>' && i == 9)   f -= 11;
             }
-            if(i == 9 && j==9)
+            if(i == 9 || i == 0)
             {
-                cout<<"\n ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞";
+                if(level == 1)      cout<<":";
+                else if(level == 2) cout<<"|";
             }
+            if(i == 9 && j==9)  { cout<<"\n ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞";}
             
             switch(h[(j*10)+i])
             {
@@ -248,59 +197,52 @@ void calc(int n)   //Brain of the program. Entire game operation happens here.
                 case '|': cout<<"∥"; break;
                 default : cout<<h[(j*10)+i];
             }
-            
         }cout<<endl;
     }
 }
 
 int main()  
 { 
-    helpscreen();
-    lame(0,0);
+    mainMenu();
+    gameOver(0,0);
 }
-void lame(int sc,int k) //To exit the game when the snake bites itself
+void gameOver(short score,short k) //To exit the game when the snake bites itself
 {   
     do{
-        if(k==420)
+        if(k == 420)
         {
-            cout<<"LOST";
-            cout<<"\nScore:"<<sc;
+            system("clear");
+            cout<<"Game Over!\nScore:"<<score;
             exit(0);
         }
         take_input();
-        
     }while(1);
 }
-void helpscreen()   //Main Menu
+void mainMenu()   //Main Menu
 {   
-    int choice=48;
+    char choice='z';
     cout<<"Welcome to the game!\nCreated by Allen\n";
-    cout<<"Press:\n1 to Play\n2 for Help\n3 for Game Settings";
+    cout<<"Press:\n1 to Play\n2 for Help\n3 for Game Settings\n4 to exit\n";
     cin>>choice;
-    if(choice==2)   //Instructions
+    if(choice == '2')   //Instructions
     {   
         system("clear");
         cout<<"CONTROLS\nPRESS\n 5 or w TO MOVE UPWARD\n 2 or s TO MOVE DOWNWARDS \n 3 or d TO MOVE RIGHT \n 1 or a TO MOVE LEFT";
         cout<<"\n Press 3 to start the game";
-        
         cout<<"\n Press any key to continue";
         cin>>choice;
     }
-    if (choice == 3)
+    if(choice == '3')
     {
         system("clear");
-        cout<<"Control the Snake Speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard";
-        cin>>speed;
-        cout<<"Control the Game Difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2";
+        cout<<"Control the Snake Speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard\n";
+        cin>>pace;
+        cout<<"Control the Game Difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2\n";
         cin>>level;
         level = (level == 1) ? 1 : 2;
-        if(speed == 1)
-        {
-            speed = 500;
-        }
-        else if (speed == 2)
-        {
-            speed = 400;
-        }else{speed = 300;}
+        if(pace == 1)   speed = 500;
+        if(pace == 2)   speed = 400;
+        else            speed = 300;
     }
+    if(choice == '4') exit(0);
 }
