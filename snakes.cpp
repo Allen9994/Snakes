@@ -301,7 +301,10 @@ void fileManage(string data, char option)
 }
 void speedSelector()
 {
-    if(pace == 1)   speed = 550;
-    if(pace == 2)   speed = 400;
-    if(pace == 3)   speed = 250;
+    switch(pace)
+    {
+        case 1: speed = 550;break;
+        case 2: speed = 400;break;
+        case 3: speed = 250;break;
+    }
 }
