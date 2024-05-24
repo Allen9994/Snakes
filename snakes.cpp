@@ -5,6 +5,7 @@
 #include <unistd.h>
 #endif
 #include <iostream>
+#include <fstream>
 #include <chrono>
 #include <thread>
 #include <mutex>
@@ -16,11 +17,12 @@
 using namespace std;
 
 short score = 0;
-static short points = 0;
-short side = 15;
+short points = 0;
+short side = 10;
 short area = side * side;
 short speed = 400, level = 2, value = 3, pace = 2, f = 0;
 string h(area,' ');
+short highscore = 0;
 string uline(side+1,'_');
 string bline(side+1,'"');
 
@@ -30,6 +32,8 @@ void display();
 void gameOver(short,short);
 void calc(short);
 void mainMenu();
+void fileManage(string,char);
+void speedSelector();
 
 short randomize(short poll)
 {   
@@ -37,7 +41,7 @@ short randomize(short poll)
     short p[area-1];
     for (short index = 0; index < area/2; index++) 
     {
-        p[index] = (rand() % area-1) + 1;
+        p[index] = (rand() % area-2) + 1;
     }
     return p[poll];
 }
@@ -127,7 +131,7 @@ void calc(short n)   //Brain of the program. Entire game operation happens here.
     {
         if(n>=area||n<0) gameOver(points,420);
     }
-    static short g=0,t=0,j=0,p=0,q=0,b[1000];
+    static short g=0,t=0,p=0,q=0,b[1000];
 
     b[++g] = n; //Storing the values to another array
     p = b[g];
@@ -211,6 +215,7 @@ void display()
 
 int main()  
 { 
+    fileManage("0",'i');
     mainMenu();
     gameOver(0,0);
 }
@@ -220,10 +225,10 @@ void gameOver(short score,short k) //To exit the game when the snake bites itsel
         if(k == 420)
         {
             system("clear");
+            fileManage(to_string(pace) + to_string(level),'s');
+            fileManage(to_string(score),'o');
             cout<<"Game Over!\nScore:"<<score;
-            while (cin.get() != '\n');
-            system("clear");
-            main();
+            exit(0);
         }
         take_input();
     }while(1);
@@ -231,7 +236,7 @@ void gameOver(short score,short k) //To exit the game when the snake bites itsel
 void mainMenu()   //Main Menu
 {   
     char choice='z';
-    cout<<"Welcome to the game!\nCreated by Allen\n";
+    cout<<"\nCreated by Allen\n";
     cout<<"Press:\n1 to Play\n2 for Help\n3 for Game Settings\n4 to exit\n";
     cin>>choice;
     if(choice == '2')   //Instructions
@@ -250,9 +255,53 @@ void mainMenu()   //Main Menu
         cout<<"Control the Game Difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2\n";
         cin>>level;
         level = (level == 1) ? 1 : 2;
-        if(pace == 1)   speed = 500;
-        if(pace == 2)   speed = 400;
-        else            speed = 300;
+        speedSelector();
+        
     }
     if(choice == '4') exit(0);
+}
+
+void fileManage(string data, char option)
+{
+    if(option == 'i')
+    {
+        ifstream file("snakes_data.txt"); 
+        if(!file) cout<<"Welcome to the game!"; 
+        else
+        {
+            string s;
+            cout<<"Welcome back to the game!\nThe highscore is ";
+            while (file.good()) {
+                getline(file,s);
+            }
+            pace =  s[0] - '0';
+            level = s[1] - '0';
+            if (highscore < stoi(s.substr(2))) highscore = stoi(s.substr(2)) ;
+            cout<<highscore;
+            speedSelector();
+        }
+        file.close();
+    }
+    if(option == 's') {
+        ofstream fout("snakes_data.txt",ios::app);
+        fout<<endl<<data;
+        fout.close();
+    }
+    if(option == 'o')
+    {
+        ofstream fout("snakes_data.txt", ios::app);
+        if(stoi(data) > highscore) 
+        {
+            highscore = stoi(data);
+            cout<<"HIGHSCORE! "<<highscore<<endl;
+        }
+        fout<<highscore;
+        fout.close();
+    }
+}
+void speedSelector()
+{
+    if(pace == 1)   speed = 550;
+    if(pace == 2)   speed = 400;
+    if(pace == 3)   speed = 250;
 }
