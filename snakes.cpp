@@ -17,9 +17,12 @@ using namespace std;
 
 short score = 0;
 static short points = 0;
+short side = 10;
+short area = side * side;
 short speed = 400, level = 2, value = 3, pace = 2, f = 0;
-short a[100] = {0};
-string h = "                                                                                                    ";
+string h(area,' ');
+string uline(side+1,'_');
+string bline(side+1,'"');
 
 condition_variable cv;
 void control(short);
@@ -30,10 +33,10 @@ void mainMenu();
 short randomize(short poll)
 {   
     srand((unsigned) time(0));
-    short p[99];
+    short p[area-1];
     for (short index = 0; index < 50; index++) 
     {
-        p[index] = (rand() % 99) + 1;
+        p[index] = (rand() % area-1) + 1;
     }
     return p[poll];
 }
@@ -94,9 +97,9 @@ void control(short value) //Converts user input to the direction snake must move
     switch(value)
     {      
         case 3: f++;    break;
-        case 2: f+=10;  break;
+        case 2: f+=side;  break;
         case 1: f--;    break;
-        case 5: f-=10;  break;
+        case 5: f-=side;  break;
     }
     calc(f);
 }
@@ -111,17 +114,17 @@ void calc(short n)   //Brain of the program. Entire game operation happens here.
     if(!flag)
     {
         w=randomize(score);
-        if((w+1)%10 == 0) w++;
+        if((w+1)%side == 0) w++;
         flag = true;
     }
     if(level == 1)
     {
-        if(n>99)    n -= 100;
-        else if(n<0)n += 100;
+        if(n>=area)    n -= area;
+        else if(n<0)n += area;
     }
     if(level == 2)
     {
-        if(n>99||n<0) gameOver(points,420);
+        if(n>=area||n<0) gameOver(points,420);
     }
     static short g=0,t=0,j=0,p=0,q=0,b[1000];
 
@@ -139,14 +142,14 @@ void calc(short n)   //Brain of the program. Entire game operation happens here.
         h[n+1]= '=';
         h[n]= '<';
     }else 
-    if(p/10 == (q/10)+1)
+    if(p/side == (q/side)+1)
     {
-        h[n-10]= '|';
+        h[n-side]= '|';
         h[n]= 'v';
     }else 
-    if(p/10 ==(q/10)-1)
+    if(p/side ==(q/side)-1)
     {
-        h[n+10]= '|';
+        h[n+side]= '|';
         h[n]= '^';
     }
         
@@ -163,39 +166,39 @@ void calc(short n)   //Brain of the program. Entire game operation happens here.
     {
         if(b[i] == b[g])  gameOver(points,420);  //When the snake bites itself
     }
+    cout<<uline<<endl;
     
-    cout<<" _________"<<endl;
-    
-    for (j=0;j<10;j++)  //Designing the 2Dmodel : Borders not made yet
+    for (j=0;j<side;j++)  //Designing the 2Dmodel : Borders not made yet
     {   
-        for (i=0;i<10;i++)
+        for (i=0;i<side;i++)
         {
             if(level == 2)
             {
-                if((h[(j*10)+i] == '>' && i == 9) || (h[(j*10)+i] == '<' && i == 9)){
+                if((h[(j*side)+i] == '>' && i == 9) || (h[(j*side)+i] == '<' && i == 9)){
                     gameOver(points,420);
                 }
             }
             else
             {
-                if(h[(j*10)+i] == '<' && i == 9)        f += 11;
-                else if(h[(j*10)+i] == '>' && i == 9)   f -= 11;
+                if(h[(j*side)+i] == '<' && i == 9)        f += 11;
+                else if(h[(j*side)+i] == '>' && i == 9)   f -= 11;
             }
-            if(i == 9 || i == 0)
+            if(i == side-1 || i == 0)
             {
                 if(level == 1)      cout<<":";
                 else if(level == 2) cout<<"|";
             }
-            if(i == 9 && j==9)  { cout<<"\n ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞ ͞";}
+            if(i == side-1 && j==side-1) cout<<endl<<bline;
             
-            switch(h[(j*10)+i])
+            
+            switch(h[(j*side)+i])
             {
                 case '<': cout<<"◀"; break;
                 case '>': cout<<"▶"; break;
                 case '^': cout<<"▲"; break;
                 case 'v': cout<<"▼"; break;
                 case '|': cout<<"∥"; break;
-                default : cout<<h[(j*10)+i];
+                default : cout<<h[(j*side)+i];
             }
         }cout<<endl;
     }
@@ -213,7 +216,9 @@ void gameOver(short score,short k) //To exit the game when the snake bites itsel
         {
             system("clear");
             cout<<"Game Over!\nScore:"<<score;
-            exit(0);
+            while (cin.get() != '\n');
+            system("clear");
+            main();
         }
         take_input();
     }while(1);
