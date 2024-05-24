@@ -26,6 +26,7 @@ string bline(side+1,'"');
 
 condition_variable cv;
 void control(short);
+void display();
 void gameOver(short,short);
 void calc(short);
 void mainMenu();
@@ -166,8 +167,12 @@ void calc(short n)   //Brain of the program. Entire game operation happens here.
     {
         if(b[i] == b[g])  gameOver(points,420);  //When the snake bites itself
     }
+    display();
+}
+void display()
+{
     cout<<uline<<endl;
-    
+    short i,j;
     for (j=0;j<side;j++)  //Designing the 2Dmodel : Borders not made yet
     {   
         for (i=0;i<side;i++)
