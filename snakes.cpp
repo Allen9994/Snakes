@@ -17,7 +17,7 @@ using namespace std;
 
 short score = 0;
 static short points = 0;
-short side = 10;
+short side = 15;
 short area = side * side;
 short speed = 400, level = 2, value = 3, pace = 2, f = 0;
 string h(area,' ');
@@ -34,7 +34,7 @@ short randomize(short poll)
 {   
     srand((unsigned) time(0));
     short p[area-1];
-    for (short index = 0; index < 50; index++) 
+    for (short index = 0; index < area/2; index++) 
     {
         p[index] = (rand() % area-1) + 1;
     }
@@ -119,8 +119,8 @@ void calc(short n)   //Brain of the program. Entire game operation happens here.
     }
     if(level == 1)
     {
-        if(n>=area)    n -= area;
-        else if(n<0)n += area;
+        if(n>=area)     n -= area;
+        else if(n<0)    n += area;
     }
     if(level == 2)
     {
@@ -174,14 +174,14 @@ void calc(short n)   //Brain of the program. Entire game operation happens here.
         {
             if(level == 2)
             {
-                if((h[(j*side)+i] == '>' && i == 9) || (h[(j*side)+i] == '<' && i == 9)){
+                if((h[(j*side)+i] == '>' && i == side-1) || (h[(j*side)+i] == '<' && i == side-1)){
                     gameOver(points,420);
                 }
             }
             else
             {
-                if(h[(j*side)+i] == '<' && i == 9)        f += 11;
-                else if(h[(j*side)+i] == '>' && i == 9)   f -= 11;
+                if(h[(j*side)+i] == '<' && i == side-1)        f += side+1;
+                else if(h[(j*side)+i] == '>' && i == side-1)   f -= side+1;
             }
             if(i == side-1 || i == 0)
             {
