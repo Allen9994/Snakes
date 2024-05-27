@@ -107,8 +107,8 @@ void process(short n)   //Brain of the program. Entire game operation happens he
 {
     system("clear");
     short i;
-    static short tr=0,w=0;
-    static bool flag=false;
+    static short tr=0,w=0,y=101,tim=0;
+    static bool flag=false,bonus=false;
     if(tr != score) flag=false;
     tr=score;
     if(!flag)
@@ -116,6 +116,12 @@ void process(short n)   //Brain of the program. Entire game operation happens he
         w=randomize(score);
         if((w+1)%side == 0) w++;
         flag = true;
+        if(score%4 == 3 and !bonus)
+        {
+            y=randomize(w/2);
+            if((y+1)%side == 0) y++;
+            bonus = true;
+        }
     }
     if(level == 1)
     {
@@ -154,11 +160,23 @@ void process(short n)   //Brain of the program. Entire game operation happens he
     }
         
     h[w]='+'; //The point which determines the score and increments the length of the snake 
+    if(bonus)
+    {
+        if (tim < g) {h[y]='@';cout<<int(1.5*side)-g+tim<<endl;}
+        if (tim == g-int(1.5*side)) {bonus = false; h[y] = ' ';y=101;}
+    }
+    else {tim = g;cout<<endl;}
     if(n == w)    
     {
         cout<<"\a";
         points += pace*level;
         score++;
+    }
+    if(n == y)
+    {
+        cout<<"\a\a";
+        points += pace*level*3;
+        bonus = false;
     }
     if(g > 4-score) h[b[g-4-score]]= ' ';      //For shortening the snake length dynamically
        
