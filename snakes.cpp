@@ -10,7 +10,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include<stdlib.h>
+#include <stdlib.h>
 #include <termios.h> //termios, TCSANOW, ECHO, ICANON
 #include <unistd.h> 
 #include <time.h>
@@ -162,10 +162,22 @@ void process(short n)   //Brain of the program. Entire game operation happens he
     h[w]='+'; //The point which determines the score and increments the length of the snake 
     if(bonus)
     {
-        if (tim < g) {h[y]='@';cout<<int(1.5*side)-g+tim<<endl;}
-        if (tim == g-int(1.5*side)) {bonus = false; h[y] = ' ';y=101;}
+        if (tim < g) 
+        {
+            h[y]='@';
+            cout<<int(1.5*side)-g+tim<<endl;
+        }
+        if (tim == g-int(1.5*side)) 
+        {
+            bonus = false; 
+            h[y] = ' ';
+            y=101;
+        }
     }
-    else {tim = g;cout<<endl;}
+    else {
+        tim = g;
+        cout<<endl;
+    }
     if(n == w)    
     {
         cout<<"\a";
