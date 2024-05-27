@@ -20,17 +20,18 @@ short score = 0;
 short points = 0;
 short side = 10;
 short area = side * side;
-short speed = 400, level = 2, value = 3, pace = 2, f = 0;
+short speed = 400, level = 2, pace = 2, f = 0;
+char value = 'd';
 string h(area,' ');
 short highscore = 0;
 string uline(side+1,'_');
 string bline(side+1,'"');
 
 condition_variable cv;
-void control(short);
+void control(char);
 void display();
-void gameOver(short,short);
-void calc(short);
+void gameToggle(short,short);
+void process(short);
 void mainMenu();
 void fileManage(string,char);
 void speedSelector();
@@ -45,42 +46,37 @@ short randomize(short poll)
     }
     return p[poll];
 }
-
 void read_value() //inputting value from user
 {   
- static struct termios oldt, newt;
+    static struct termios oldt, newt;
 
- /* tcgetattr gets the parametervas of the current terminal
-STDIN_FILENO will tell tcgetattr that it should write the
-settings of stdin to oldt */
- tcgetattr( STDIN_FILENO, &oldt);
- /*now the settings will be copied*/
- newt = oldt;
-
- /* ICANON normally takes care that one line at a time will be
-processed that means it will return if it sees a "\n" or an EOF
-or an EOL */
- newt.c_lflag &= ~(ICANON);
-
- /* Those new settings will be set to STDIN TCSANOW tells
-tcsetattr to change attributes immediately. */
- tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+     /* tcgetattr gets the parametervas of the current terminal
+    STDIN_FILENO will tell tcgetattr that it should write the
+    settings of stdin to oldt */
+    tcgetattr( STDIN_FILENO, &oldt);
+     /*now the settings will be copied*/
+    newt = oldt;
+    
+     /* ICANON normally takes care that one line at a time will be
+    processed that means it will return if it sees a "\n" or an EOF
+    or an EOL */
+    newt.c_lflag &= ~(ICANON);
+    
+     /* Those new settings will be set to STDIN TCSANOW tells
+    tcsetattr to change attributes immediately. */
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
  
     char c = getchar();
     switch(c)
     {
-        case 'w': value = (int)c - 114;break;
-        case 's': value = (int)c - 113;break;
-        case 'd': value = (int)c - 97;break;
-        case 'a': value = (int)c - 96;break;
-        case '1': value = (int)c - 48;break;
-        case '2': value = (int)c - 48;break;
-        case '3': value = (int)c - 48;break;
-        case '5': value = (int)c - 48;break;  
+        case 'w': 
+        case 's': 
+        case 'd': 
+        case 'a': value = c;
     }
 
  /* restore the old settings */
- tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
+tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
   
     cv.notify_one();
 }
@@ -94,21 +90,20 @@ void take_input() //function to accept the value parallelly while game is procee
         control(value);
     }
     th.join();
-
     control(value);
 }
-void control(short value) //Converts user input to the direction snake must move and stores all the movements into the array
+void control(char value) //Converts user input to the direction snake must move and stores all the movements into the array
 {   
     switch(value)
     {      
-        case 3: f++;    break;
-        case 2: f+=side;  break;
-        case 1: f--;    break;
-        case 5: f-=side;  break;
+        case 'd': f++;        break;
+        case 's': f+=side;    break;
+        case 'a': f--;        break;
+        case 'w': f-=side;    break;
     }
-    calc(f);
+    process(f);
 }
-void calc(short n)   //Brain of the program. Entire game operation happens here. 
+void process(short n)   //Brain of the program. Entire game operation happens here. 
 {
     system("clear");
     short i;
@@ -127,9 +122,9 @@ void calc(short n)   //Brain of the program. Entire game operation happens here.
         if(n>=area)     n -= area;
         else if(n<0)    n += area;
     }
-    if(level == 2)
+    else if(level == 2)
     {
-        if(n>=area||n<0) gameOver(points,420);
+        if(n>=area||n<0) gameToggle(points,420);
     }
     static short g=0,t=0,p=0,q=0,b[1000];
 
@@ -169,7 +164,7 @@ void calc(short n)   //Brain of the program. Entire game operation happens here.
        
     for(i=g-4-score;i<g;i++)
     {
-        if(b[i] == b[g])  gameOver(points,420);  //When the snake bites itself
+        if(b[i] == b[g])  gameToggle(points,420);  //When the snake bites itself
     }
     display();
 }
@@ -184,7 +179,7 @@ void display()
             if(level == 2)
             {
                 if((h[(j*side)+i] == '>' && i == side-1) || (h[(j*side)+i] == '<' && i == side-1)){
-                    gameOver(points,420);
+                    gameToggle(points,420);
                 }
             }
             else
@@ -199,7 +194,6 @@ void display()
             }
             if(i == side-1 && j==side-1) cout<<endl<<bline;
             
-            
             switch(h[(j*side)+i])
             {
                 case '<': cout<<"◀"; break;
@@ -212,14 +206,12 @@ void display()
         }cout<<endl;
     }
 }
-
 int main()  
 { 
     fileManage("0",'i');
     mainMenu();
-    gameOver(0,0);
 }
-void gameOver(short score,short k) //To exit the game when the snake bites itself
+void gameToggle(short score,short k) //To exit the game when the snake bites itself
 {   
     do{
         if(k == 420)
@@ -239,13 +231,14 @@ void mainMenu()   //Main Menu
     cout<<"\nCreated by Allen\n";
     cout<<"Press:\n1 to Play\n2 for Help\n3 for Game Settings\n4 to exit\n";
     cin>>choice;
+    if(choice == '1') gameToggle(0,0);
     if(choice == '2')   //Instructions
     {   
         system("clear");
-        cout<<"CONTROLS\nPRESS\n 5 or w TO MOVE UPWARD\n 2 or s TO MOVE DOWNWARDS \n 3 or d TO MOVE RIGHT \n 1 or a TO MOVE LEFT";
-        cout<<"\n Press 3 to start the game";
-        cout<<"\n Press any key to continue";
+        cout<<"CONTROLS\nPRESS\n w TO MOVE UPWARD\n s TO MOVE DOWNWARDS \n d TO MOVE RIGHT \n a TO MOVE LEFT";
         cin>>choice;
+        system("clear");
+        main();
     }
     if(choice == '3')
     {
@@ -256,23 +249,22 @@ void mainMenu()   //Main Menu
         cin>>level;
         level = (level == 1) ? 1 : 2;
         speedSelector();
-        
+        gameToggle(0,0);
     }
-    if(choice == '4') exit(0);
+    else exit(0);
 }
-
 void fileManage(string data, char option)
 {
     if(option == 'i')
     {
-        ifstream file("snakes_data.txt"); 
-        if(!file) cout<<"Welcome to the game!"; 
+        ifstream fin("snakes_data.txt"); 
+        if(!fin) cout<<"Welcome to the game!"; 
         else
         {
             string s;
             cout<<"Welcome back to the game!\nThe highscore is ";
-            while (file.good()) {
-                getline(file,s);
+            while (fin.good()) {
+                getline(fin,s);
             }
             pace =  s[0] - '0';
             level = s[1] - '0';
@@ -280,14 +272,14 @@ void fileManage(string data, char option)
             cout<<highscore;
             speedSelector();
         }
-        file.close();
+        fin.close();
     }
-    if(option == 's') {
+    else if(option == 's') {
         ofstream fout("snakes_data.txt",ios::app);
         fout<<endl<<data;
         fout.close();
     }
-    if(option == 'o')
+    else if(option == 'o')
     {
         ofstream fout("snakes_data.txt", ios::app);
         if(stoi(data) > highscore) 
@@ -304,7 +296,7 @@ void speedSelector()
     switch(pace)
     {
         case 1: speed = 550;break;
-        case 2: speed = 400;break;
         case 3: speed = 250;break;
+        default:speed = 400;pace = 2;break;
     }
 }
