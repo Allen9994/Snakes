@@ -22,10 +22,11 @@ short score = 0;
 short points = 0;
 short i,j;
 char wall[] = {':','|'};
-short side = 10;
-short area = side * side;
+const short side = 10;
+const short area = side * side;
 short speed = 400, level = 2, pace = 2, head = 0;
 char value = 'd';
+short p[area-1] = {0};
 vector<int> trail(1, 0); 
 string map(area,' ');
 short highscore = 0;
@@ -41,16 +42,15 @@ void mainMenu();
 void fileManage(string,char);
 void speedSelector();
 
-short randomize(short poll)
-{   
+void randomize()
+{
     srand((unsigned) time(0));
-    short p[area-1];
     for (short index = 0; index < area/2; index++) 
     {
         p[index] = (rand() % area-2) + 1;
     }
-    return p[poll];
 }
+
 void read_value() //inputting value from user
 {   
     static struct termios oldt, newt;
@@ -90,10 +90,7 @@ void take_input() //function to accept the value parallelly while game is procee
     thread th(read_value);
     mutex mtx;
     unique_lock<mutex> lck(mtx);
-    while (cv.wait_for(lck, chrono::milliseconds(speed)) == cv_status::timeout)
-    {
-        control(value);
-    }
+    while (cv.wait_for(lck, chrono::milliseconds(speed)) == cv_status::timeout) control(value);
     th.join();
     control(value);
 }
@@ -118,12 +115,12 @@ void process()   //Brain of the program. Entire game operation happens here.
     tr=score;
     if(!flag)
     {
-        insect=randomize(score);
+        insect=p[score%(area/2)];
         if((insect+1)%side == 0) insect++;
         flag = true;
         if(score%4 == 3 and !bonus)
         {
-            frog=randomize(insect/2);
+            frog=p[(insect/2)%(area/2)];
             if((frog+1)%side == 0) frog++;
             bonus = true;
         }
@@ -238,6 +235,7 @@ void display()
 int main()  
 { 
     fileManage("0",'i');
+    randomize();
     mainMenu();
 }
 void gameToggle(short score, bool toggle) //To exit the game when the snake bites itself
