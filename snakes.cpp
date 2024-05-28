@@ -6,6 +6,8 @@
 #endif
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <algorithm>
 #include <chrono>
 #include <thread>
 #include <mutex>
@@ -18,11 +20,13 @@ using namespace std;
 
 short score = 0;
 short points = 0;
+short i,j;
 short side = 10;
 short area = side * side;
-short speed = 400, level = 2, pace = 2, f = 0;
+short speed = 400, level = 2, pace = 2, head = 0;
 char value = 'd';
-string h(area,' ');
+vector<int> trail(1, 0); 
+string map(area,' ');
 short highscore = 0;
 string uline(side+1,'_');
 string bline(side+1,'"');
@@ -31,7 +35,7 @@ condition_variable cv;
 void control(char);
 void display();
 void gameToggle(short,short);
-void process(short);
+void process();
 void mainMenu();
 void fileManage(string,char);
 void speedSelector();
@@ -96,126 +100,124 @@ void control(char value) //Converts user input to the direction snake must move 
 {   
     switch(value)
     {      
-        case 'd': f++;        break;
-        case 's': f+=side;    break;
-        case 'a': f--;        break;
-        case 'w': f-=side;    break;
+        case 'd': head++;        break;
+        case 's': head+=side;    break;
+        case 'a': head--;        break;
+        case 'w': head-=side;    break;
     }
-    process(f);
+    process();
 }
-void process(short n)   //Brain of the program. Entire game operation happens here. 
+void process()   //Brain of the program. Entire game operation happens here. 
 {
     system("clear");
     short i;
-    static short tr=0,w=0,y=101,tim=0;
+    static short tr=0,insect=0,frog=101,time_=0;
     static bool flag=false,bonus=false;
     if(tr != score) flag=false;
     tr=score;
     if(!flag)
     {
-        w=randomize(score);
-        if((w+1)%side == 0) w++;
+        insect=randomize(score);
+        if((insect+1)%side == 0) insect++;
         flag = true;
         if(score%4 == 3 and !bonus)
         {
-            y=randomize(w/2);
-            if((y+1)%side == 0) y++;
+            frog=randomize(insect/2);
+            if((frog+1)%side == 0) frog++;
             bonus = true;
         }
     }
     if(level == 1)
     {
-        if(n>=area)     n -= area;
-        else if(n<0)    n += area;
+        if(head>=area)     head -= area;
+        else if(head<0)    head += area;
     }
-    else if(level == 2)
-    {
-        if(n>=area||n<0) gameToggle(points,420);
-    }
-    static short g=0,t=0,p=0,q=0,b[1000];
-
-    b[++g] = n; //Storing the values to another array
-    p = b[g];
-    q = b[g-1];  //For identifying the previous position and the new position of the snake
+    else if(level == 2 && (head >= area || head < 0)) gameToggle(points,420);
+    
+    static short t=0,p=0,q=0;
+    static int pulse = 0;
+    if(find(trail.begin(), trail.end(), head) != trail.end()) gameToggle(points,420); 
+    trail.push_back(head);
+    ++pulse;
+    p = trail[trail.size()-1];
+    q = trail[trail.size()-2];
     
     if(p == q+1)
     {   
-        h[n-1]= '=';
-        h[n]= '>';
+        map[head-1]= '=';
+        map[head]= '>';
     }else 
     if(p == q-1)
     {
-        h[n+1]= '=';
-        h[n]= '<';
+        map[head+1]= '=';
+        map[head]= '<';
     }else 
     if(p/side == (q/side)+1)
     {
-        h[n-side]= '|';
-        h[n]= 'v';
+        map[head-side]= '|';
+        map[head]= 'v';
     }else 
     if(p/side ==(q/side)-1)
     {
-        h[n+side]= '|';
-        h[n]= '^';
+        map[head+side]= '|';
+        map[head]= '^';
     }
-        
-    h[w]='+'; //The point which determines the score and increments the length of the snake 
+    
+    map[insect]='+'; //The point which determines the score and increments the length of the snake 
     if(bonus)
     {
-        if (tim < g) 
+        if (time_ < pulse) 
         {
-            h[y]='@';
-            cout<<int(1.5*side)-g+tim<<endl;
+            map[frog]='@';
+            cout<<int(1.5*side)-pulse+time_<<endl;
         }
-        if (tim == g-int(1.5*side)) 
+        if (time_ == pulse-int(1.5*side)) 
         {
             bonus = false; 
-            h[y] = ' ';
-            y=101;
+            map[frog] = ' ';
+            frog=area+1;
         }
     }
     else {
-        tim = g;
+        time_ = pulse;
         cout<<endl;
     }
-    if(n == w)    
+    if(head == insect)    
     {
         cout<<"\a";
         points += pace*level;
         score++;
     }
-    if(n == y)
+    if(head == frog)
     {
-        cout<<"\a\a";
+        cout<<"\a";
         points += pace*level*3;
         bonus = false;
     }
-    if(g > 4-score) h[b[g-4-score]]= ' ';      //For shortening the snake length dynamically
-       
-    for(i=g-4-score;i<g;i++)
+    if(pulse> 3-score) 
     {
-        if(b[i] == b[g])  gameToggle(points,420);  //When the snake bites itself
-    }
+        map[trail[0]] = ' ';      //For shortening the snake length dynamically
+        if (head != insect)    trail.erase(trail.begin());
+    }   
     display();
 }
 void display()
 {
     cout<<uline<<endl;
-    short i,j;
     for (j=0;j<side;j++)  //Designing the 2Dmodel : Borders not made yet
     {   
         for (i=0;i<side;i++)
         {
             if(level == 2)
             {
-                if((h[(j*side)+i] == '>' && i == side-1) || (h[(j*side)+i] == '<' && i == side-1)){
+                if((map[(j*side)+i] == '>' && i == side-1) || (map[(j*side)+i] == '<' && i == side-1)){
                     gameToggle(points,420);
                 }
             }
             else
             {
-                if(h[(j*side)+i] == '<' && i == side-1)        f += side+1;
-                else if(h[(j*side)+i] == '>' && i == side-1)   f -= side+1;
+                if(map[(j*side)+i] == '<' && i == side-1)        head += side+1;
+                else if(map[(j*side)+i] == '>' && i == side-1)   head -= side+1;
             }
             if(i == side-1 || i == 0)
             {
@@ -224,14 +226,14 @@ void display()
             }
             if(i == side-1 && j==side-1) cout<<endl<<bline;
             
-            switch(h[(j*side)+i])
+            switch(map[(j*side)+i])
             {
                 case '<': cout<<"◀"; break;
                 case '>': cout<<"▶"; break;
                 case '^': cout<<"▲"; break;
                 case 'v': cout<<"▼"; break;
                 case '|': cout<<"∥"; break;
-                default : cout<<h[(j*side)+i];
+                default : cout<<map[(j*side)+i];
             }
         }cout<<endl;
     }
