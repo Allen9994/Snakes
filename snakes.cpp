@@ -45,10 +45,7 @@ void speedSelector();
 void randomize()
 {
     srand((unsigned) time(0));
-    for (short index = 0; index < area/2; index++) 
-    {
-        p[index] = (rand() % area-2) + 1;
-    }
+    for (short index = 0; index < area/2; index++) p[index] = (rand() % area-2) + 1;
 }
 
 void read_value() //inputting value from user
@@ -201,7 +198,7 @@ void process()   //Brain of the program. Entire game operation happens here.
 }
 void display()
 {
-    cout<<uline<<endl;
+    cout<<points<<endl<<uline<<endl;
     for (j=0;j<side;j++)  //Designing the 2Dmodel : Borders not made yet
     {   
         for (i=0;i<side;i++)
@@ -209,6 +206,8 @@ void display()
             if(level == 2)
             {
                 if((map[(j*side)+i] == '>' && i == side-1) || (map[(j*side)+i] == '<' && i == side-1)){
+                    cout<<endl;
+                    system("clear");
                     gameToggle(points,false);
                 }
             }
@@ -241,16 +240,15 @@ int main()
 void gameToggle(short score, bool toggle) //To exit the game when the snake bites itself
 {   
     do{
-        if(!toggle)
+        if(toggle) take_input();
+        else
         {
-            system("clear");
             fileManage(to_string(pace) + to_string(level),'s');
             fileManage(to_string(score),'o');
             cout<<"Game Over!\nScore:"<<score;
             exit(0);
         }
-        take_input();
-    }while(1);
+    }while(toggle);
 }
 void mainMenu()   //Main Menu
 {   
@@ -258,10 +256,10 @@ void mainMenu()   //Main Menu
     cout<<"\nCreated by Allen\n";
     cout<<"Press:\n1 to Play\n2 for Help\n3 for Game Settings\n4 to exit\n";
     cin>>choice;
+    system("clear");
     if(choice == '1') gameToggle(0,true);
     if(choice == '2')   //Instructions
     {   
-        system("clear");
         cout<<"CONTROLS\nPRESS\n w TO MOVE UPWARD\n s TO MOVE DOWNWARDS \n d TO MOVE RIGHT \n a TO MOVE LEFT";
         cin>>choice;
         system("clear");
@@ -269,7 +267,6 @@ void mainMenu()   //Main Menu
     }
     if(choice == '3')
     {
-        system("clear");
         cout<<"Control the Snake Speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard\n";
         cin>>pace;
         cout<<"Control the Game Difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2\n";
