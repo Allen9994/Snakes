@@ -29,6 +29,7 @@ private:
     mutex mtx;
     condition_variable cv;
 
+    void hitWall();
     void initialize();
     void read_value();
     void takeInput();
@@ -54,6 +55,17 @@ public:
         mainMenu();
     }
 };
+void SnakeGame::hitWall() {
+    if (level == 1) {
+        if (head >= area) head -= area;
+        else if (head < 0) head += area;
+        else if (head%side == side-1 && value == 'd') head = (head - side) + 1;
+        else if (head%side == side-1 && value == 'a') head = (head + side) - 1;
+    }
+    if (level == 2) {
+        if (head%side == side-1 || head >= area || head < 0) gameToggle(false);
+    } 
+}
 void SnakeGame::initialize() {
     location.clear();
     area = side * side;
@@ -75,10 +87,7 @@ void SnakeGame::read_value() {
 
     char c = getchar();
     if (c == 'w' || c == 's' || c == 'd' || c == 'a' || c == 't') value = c;
-    if (value == 't') {
-        clearConsole();
-        gameToggle(false);
-    }
+    if (value == 't') gameToggle(false);
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
@@ -106,6 +115,7 @@ void SnakeGame::control(char value) {
 
 void SnakeGame::process() {
     clearConsole();
+    hitWall();
     if (tr != score) flag = false;
     tr = score;
     if (!flag) {
@@ -118,10 +128,7 @@ void SnakeGame::process() {
             bonus = true;
         }
     }
-    if (level == 1) {
-        if (head >= area) head -= area;
-        else if (head < 0) head += area;
-    } else if (level == 2 && (head >= area || head < 0)) gameToggle(false);
+    
 
     if (find(trail.begin(), trail.end(), head) != trail.end()) gameToggle(false);
     trail.push_back(head);
@@ -178,19 +185,8 @@ void SnakeGame::display() {
     cout << points << endl << uline << endl;
     for (j = 0; j < side; j++) {
         for (i = 0; i < side; i++) {
-            if (level == 2) {
-                if ((map[(j * side) + i] == '>' && i == side - 1) || (map[(j * side) + i] == '<' && i == side - 1)) {
-                    cout << endl;
-                    clearConsole();
-                    gameToggle(false);
-                }
-            } else {
-                if (map[(j * side) + i] == '<' && i == side - 1) head += side + 1;
-                else if (map[(j * side) + i] == '>' && i == side - 1) head -= side + 1;
-            }
             if (i == side - 1 || i == 0) cout << wall[level - 1];
             if (i == side - 1 && j == side - 1) cout << endl << bline;
-
             switch (map[(j * side) + i]) {
                 case '<': cout << "◀"; break;
                 case '>': cout << "▶"; break;
@@ -206,6 +202,7 @@ void SnakeGame::display() {
 void SnakeGame::gameToggle(bool toggle) {
     if (toggle) takeInput();
     else {
+        clearConsole();
         fileManage(to_string(pace) + to_string(level) + to_string(side), 's');
         fileManage(to_string(points), 'o');
         cout << "Game Over!\nScore:" << points << "\n";
@@ -319,3 +316,4 @@ int main() {
     game.run();
     return 0;
 }
+//End of the program
