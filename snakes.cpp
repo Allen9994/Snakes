@@ -23,13 +23,12 @@ private:
     string uline;
     string bline;
     char wall[2];
-    short tr, insect, frog, time_, p, q, pulse;
+    short tr, insect, frog, time_;
     bool flag, bonus;
 
     mutex mtx;
     condition_variable cv;
 
-    void hitWall();
     void initialize();
     void read_value();
     void takeInput();
@@ -44,32 +43,20 @@ private:
     void clearConsole();
 
 public:
-    SnakeGame(int size_map) 
+    SnakeGame() 
         : score(0), highscore(0), points(0), speed(400), level(2), pace(2), head(0), 
-          value('d'), wall{':', '|'}, side(size_map), area(0), trail(1, 0), 
-          tr(0), insect(0), frog(0), time_(0), p(0), q(0), pulse(0),
+          value('d'), wall{':', '|'}, side(14), area(side * side), trail(1, 0), 
+          tr(0), insect(0), frog(area+1), time_(0),
           flag(false), bonus(false){}
 
     void run() {
+        initialize();
         fileManage("0", 'i');
         mainMenu();
     }
 };
-void SnakeGame::hitWall() {
-    if (level == 1) {
-        if (head >= area) head -= area;
-        else if (head < 0) head += area;
-        else if (head%side == side-1 && value == 'd') head = (head - side) + 1;
-        else if (head%side == side-1 && value == 'a') head = (head + side) - 1;
-    }
-    if (level == 2) {
-        if (head%side == side-1 || head >= area || head < 0) gameToggle(false);
-    } 
-}
+
 void SnakeGame::initialize() {
-    location.clear();
-    area = side * side;
-    frog = area + 1;
     uline = string(side + 1, '_');
     bline = string(side + 1, '"');
     map = string(area, ' ');
@@ -87,7 +74,10 @@ void SnakeGame::read_value() {
 
     char c = getchar();
     if (c == 'w' || c == 's' || c == 'd' || c == 'a' || c == 't') value = c;
-    if (value == 't') gameToggle(false);
+    if (value == 't') {
+        clearConsole();
+        gameToggle(false);
+    }
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
@@ -105,17 +95,16 @@ void SnakeGame::takeInput() {
 
 void SnakeGame::control(char value) {
     switch (value) {
-        case 'd': head++;       break;
-        case 's': head += side; break;
-        case 'a': head--;       break;
-        case 'w': head -= side; break;
+        case 'd': head++; break;
+        case 's': head+= side; break;
+        case 'a': head--; break;
+        case 'w': head-= side; break;
     }
     process();
 }
 
 void SnakeGame::process() {
     clearConsole();
-    hitWall();
     if (tr != score) flag = false;
     tr = score;
     if (!flag) {
@@ -128,8 +117,13 @@ void SnakeGame::process() {
             bonus = true;
         }
     }
-    
+    if (level == 1) {
+        if (head >= area) head -= area;
+        else if (head < 0) head += area;
+    } else if (level == 2 && (head >= area || head < 0)) gameToggle(false);
 
+    static short p = 0, q = 0;
+    static int pulse = 0;
     if (find(trail.begin(), trail.end(), head) != trail.end()) gameToggle(false);
     trail.push_back(head);
     ++pulse;
@@ -185,8 +179,19 @@ void SnakeGame::display() {
     cout << points << endl << uline << endl;
     for (j = 0; j < side; j++) {
         for (i = 0; i < side; i++) {
+            if (level == 2) {
+                if ((map[(j * side) + i] == '>' && i == side - 1) || (map[(j * side) + i] == '<' && i == side - 1)) {
+                    cout << endl;
+                    clearConsole();
+                    gameToggle(false);
+                }
+            } else {
+                if (map[(j * side) + i] == '<' && i == side - 1) head += side + 1;
+                else if (map[(j * side) + i] == '>' && i == side - 1) head -= side + 1;
+            }
             if (i == side - 1 || i == 0) cout << wall[level - 1];
             if (i == side - 1 && j == side - 1) cout << endl << bline;
+
             switch (map[(j * side) + i]) {
                 case '<': cout << "◀"; break;
                 case '>': cout << "▶"; break;
@@ -202,8 +207,7 @@ void SnakeGame::display() {
 void SnakeGame::gameToggle(bool toggle) {
     if (toggle) takeInput();
     else {
-        clearConsole();
-        fileManage(to_string(pace) + to_string(level) + to_string(side), 's');
+        fileManage(to_string(pace) + to_string(level), 's');
         fileManage(to_string(points), 'o');
         cout << "Game Over!\nScore:" << points << "\n";
         exit(0);
@@ -215,7 +219,7 @@ void SnakeGame::speedSelector() {
     switch (pace) {
         case 1: speed = 550; break;
         case 3: speed = 250; break;
-        default:speed = 400; pace = 2; break;
+        default: speed = 400; pace = 2; break;
     }
 }
 
@@ -239,16 +243,6 @@ void SnakeGame::mainMenu() {
         cin >> level;
         level = (level == 1) ? 1 : 2;
         speedSelector();
-        cout << "Enter the map size of range[10-20]\n";
-        string size_entered;
-        cin>>size_entered;
-        if(all_of(size_entered.begin(),size_entered.end(),::isdigit)) {
-            int num = stoi(size_entered);
-            if(num > 9 && num < 21) {
-                side = num;
-                initialize();
-            }
-        }
         gameToggle(true);
     } else return;
 }
@@ -265,10 +259,7 @@ void SnakeGame::checkFileStatus() {
 void SnakeGame::fileManage(string data, char option) {
     if (option == 'i') {
         ifstream fin("snakes_data.txt");
-        if (!fin) {
-            cout << "Welcome to the game!";
-            initialize();
-        }
+        if (!fin) cout << "Welcome to the game!";
         else {
             string save_data;
             while (fin.good()) getline(fin, save_data);
@@ -279,11 +270,7 @@ void SnakeGame::fileManage(string data, char option) {
             }
             pace = save_data[0] - '0';
             level = save_data[1] - '0';
-            side = save_data[2] - '0';
-            side *= 10;
-            side += save_data[3] - '0';
-            initialize();
-            if (highscore < stoi(save_data.substr(4))) highscore = stoi(save_data.substr(4));
+            if (highscore < stoi(save_data.substr(2))) highscore = stoi(save_data.substr(2));
             cout << "Welcome back to the game!\nThe highscore is " << highscore;
             speedSelector();
         }
@@ -296,7 +283,7 @@ void SnakeGame::fileManage(string data, char option) {
         ofstream fout("snakes_data.txt", ios::app);
         if (stoi(data) > highscore) {
             highscore = stoi(data);
-            cout << "HIGHSCORE! " << endl;
+            cout << "HIGHSCORE! " << highscore << endl;
         }
         fout << highscore;
         fout.close();
@@ -312,8 +299,7 @@ void SnakeGame::clearConsole() {
 }
 
 int main() {
-    SnakeGame game(14);
+    SnakeGame game;
     game.run();
     return 0;
 }
-//End of the program
