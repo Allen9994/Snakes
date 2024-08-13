@@ -80,8 +80,15 @@ void SnakeGame::initialize() {
     bline = string(side + 1, '"');
     map = string(area, ' ');
     srand((unsigned) time(0));
-    for (short index = 0; index < area / 2; index++)
-        location.push_back((rand() % (area - 2)) + 1);
+    int loc;
+    for (short index = 0; index < area / 2; index++) {
+        if (level == 3) {
+            loc = rand() % (area - 2) + 1;
+            while(loc / side > side / 5 && loc % side == (side / 2)-1 && loc / side < 0.8 * side ||
+            (loc % side > (side / 5)-1 && loc / side == side / 2 && loc % side < (0.8 * side)-1)) loc = rand() % (area - 2) + 1;
+            location.push_back(loc);
+        } else location.push_back(loc);
+    }
 }
 
 void SnakeGame::readValue() {
@@ -161,6 +168,7 @@ void SnakeGame::gameAlgorithm() {
         if (time_ == pulse - int(1.5 * side)) {
             bonus = false;
             map[frog] = ' ';
+            frog = area + 1;
         }
     } else {
         time_ = pulse;
@@ -190,7 +198,6 @@ void SnakeGame::gameDisplay() {
         for (i = 0; i < side; i++) {
             if (i == side - 1 || i == 0) cout << wall[level - 1];
             if (i == side - 1 && j == side - 1) cout << endl << bline;
-            //
             switch (map[(j * side) + i]) {
                 case '<': cout << "◀"; break;
                 case '>': cout << "▶"; break;
