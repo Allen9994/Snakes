@@ -18,7 +18,7 @@ class SnakeGame {
 private:
     short i, j, score, highscore, points, speed, level, pace, head, side, area;
     short prevScore, insect, frog, time_, headShape, bodyShape, pulse;
-    char keyPressed, value, wall[2];
+    char keyPressed, value, wall[3];
     vector<int> location;
     vector<int> trail;
     string map, bline, uline;
@@ -37,6 +37,7 @@ private:
     void gameToggle(bool);
     void speedSelector();
     void fileErrorHandling();
+    void mazeBuilder();
     void fileManage(string, char);
     void mainMenu();
     void clearConsole();
@@ -44,7 +45,7 @@ private:
 public:
     SnakeGame(int size_map) 
         : score(0), highscore(0), points(0), speed(400), level(2), pace(2), head(0), 
-          keyPressed(' '), value('d'), wall{':', '|'}, side(size_map), area(0), trail(1, 0), 
+          keyPressed(' '), value('d'), wall{':', '|','|'}, side(size_map), area(0), trail(1, 0), 
           prevScore(0), insect(0), frog(0), time_(0), headShape(0), bodyShape(0), pulse(0),
           flag(false), bonus(false){}
 
@@ -63,6 +64,13 @@ void SnakeGame::hitWall() {
     if (level == 2) {
         if (head%side == side-1 || head >= area || head < 0) gameToggle(false);
     } 
+    if (level == 3) {
+        if (head%side == side-1 || head >= area || head < 0) gameToggle(false);
+        if(head/side > (side/5) && head%side == (side/2)-1 && 
+        head/side < (0.8*side)) gameToggle(false);
+        if(head%side > (side/5)-1 && head/side == side/2 && 
+        head%side < (0.8*side)-1) gameToggle(false);
+    }
 }
 void SnakeGame::initialize() {
     location.clear();
@@ -182,6 +190,7 @@ void SnakeGame::gameDisplay() {
         for (i = 0; i < side; i++) {
             if (i == side - 1 || i == 0) cout << wall[level - 1];
             if (i == side - 1 && j == side - 1) cout << endl << bline;
+            //
             switch (map[(j * side) + i]) {
                 case '<': cout << "◀"; break;
                 case '>': cout << "▶"; break;
@@ -216,7 +225,7 @@ void SnakeGame::speedSelector() {
 
 void SnakeGame::mainMenu() {
     char choice = 'z';
-    cout << "\nCreated by Allen\n";
+    mazeBuilder();
     cout << "Press:\n1 to Play\n2 for Help\n3 for Game Settings\n4 to exit\n";
     cin >> choice;
     clearConsole();
@@ -230,21 +239,21 @@ void SnakeGame::mainMenu() {
     if (choice == '3') {
         cout << "Control the Snake Speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard\n";
         cin >> pace;
-        cout << "Control the Game Difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2\n";
+        cout << "Control the Game Difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2\n3 : LEVEL 3\n";
         cin >> level;
-        level = (level == 1) ? 1 : 2;
         speedSelector();
-        cout << "Enter the map size of range[10-20]\n";
+        cout << "Enter the map size of range[10-15]\n";
         string size_entered;
         cin>>size_entered;
         if(all_of(size_entered.begin(),size_entered.end(),::isdigit)) {
             int num = stoi(size_entered);
-            if(num > 9 && num < 21) {
+            if(num > 9 && num < 16) {
                 side = num;
                 initialize();
             }
         }
-        gameToggle(true);
+        clearConsole();
+        mainMenu();
     } else return;
 }
 
@@ -257,6 +266,15 @@ void SnakeGame::fileErrorHandling() {
     cout << "Terminating..\n";
 }
 
+void SnakeGame::mazeBuilder()
+{
+    if (level == 3) {
+        for(int i=0;i<map.size();i++) {
+            if(i/side > side/5 && i%side == (side/2)-1 && i/side < (0.8 * side)) map[i] = '|';
+            if(i%side > (side/5)-1 && i/side == side/2 && i%side < (0.8 * side)-1) map[i] = '-';
+        }
+    }
+}
 void SnakeGame::fileManage(string data, char option) {
     if (option == 'i') {
         ifstream fin("snakes_data.txt");
@@ -267,16 +285,16 @@ void SnakeGame::fileManage(string data, char option) {
         else {
             string save_data;
             while (fin.good()) getline(fin, save_data);
-            if (save_data.size() <= 2 || !all_of(save_data.begin(), save_data.end(), ::isdigit)) {
+            if (save_data.size() <= 4 || !all_of(save_data.begin(), save_data.end(), ::isdigit)) {
                 fileErrorHandling();
                 fin.close();
                 exit(0);
             }
             pace = save_data[0] - '0';
-            level = save_data[1] - '0';
+            level= save_data[1] - '0';
             side = save_data[2] - '0';
-            side *= 10;
-            side += save_data[3] - '0';
+            side*= 10;
+            side+= save_data[3] - '0';
             initialize();
             if (highscore < stoi(save_data.substr(4))) highscore = stoi(save_data.substr(4));
             cout << "Welcome back to the game!\nThe highscore is " << highscore;
