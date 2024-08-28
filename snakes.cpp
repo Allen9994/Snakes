@@ -40,9 +40,9 @@ private:
     void clearConsole();
 
 public:
-    SnakeGame(int size_map) 
+    SnakeGame() 
         : score(0), highscore(0), points(0), speed(400), level(2), pace(2), head(0), 
-          keyPressed(' '), value('d'), wall{':', '|','|'}, side(size_map), area(0), trail(1, 0), 
+          keyPressed(' '), value('d'), wall{':', '|','|'}, side(14), area(0), trail(1, 0), 
           prevScore(0), insect(0), frog(0), time_(0), headShape(0), bodyShape(0), pulse(0),
           saveFileName("snakes_data.txt"), flag(false), bonus(false){}
 
@@ -256,7 +256,7 @@ void SnakeGame::mainMenu() {
         if(all_of(value_entered.begin(),value_entered.end(),::isdigit)) {
             int num = stoi(value_entered);
             if(num > 9 && num < 16) side = num;
-            else std::cout<<"Size entered not within range!\nReverting to previous size...\n";
+            else std::cout<<"Size entered not within range[10-15]!\nReverting to previous size...\n";
             initialize();
             sleep(2);
         }
@@ -334,7 +334,7 @@ void SnakeGame::clearConsole() {
 }
 
 int main() {
-    SnakeGame game(14);
+    SnakeGame game;
     game.run();
     return 0;
 }
