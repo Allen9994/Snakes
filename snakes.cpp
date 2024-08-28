@@ -12,19 +12,17 @@
 #include <unistd.h>
 #include <ctime>
 
-using namespace std;
-
 class SnakeGame {
 private:
     short horz, vert, score, highscore, points, speed, level, pace, head, side, area;
     short index, prevScore, insect, frog, time_, headShape, bodyShape, pulse;
     char keyPressed, value, wall[3];
-    vector<short> location, trail;
-    string saveFileName, map, bline, uline;
+    std::vector<short> location, trail;
+    std::string saveFileName, map, bline, uline;
     bool flag, bonus;
 
-    mutex mtx;
-    condition_variable cv;
+    std::mutex mtx;
+    std::condition_variable cv;
 
     void hitWall();
     void initialize();
@@ -37,7 +35,7 @@ private:
     void speedSelector();
     void handleFileStatus();
     void mazeBuilder();
-    void fileManage(string, char);
+    void fileManage(std::string, char);
     void mainMenu();
     void clearConsole();
 
@@ -78,9 +76,9 @@ void SnakeGame::initialize() {
     location.clear();
     area = side * side;
     frog = area + 1;
-    uline = string(side + 1, '_');
-    bline = string(side + 1, '"');
-    map = string(area, ' ');
+    uline = std::string(side + 1, '_');
+    bline = std::string(side + 1, '"');
+    map = std::string(area, ' ');
     srand((unsigned) time(0));
     int loc;
     for (index = 0; index < area / 2; index++) {
@@ -110,9 +108,9 @@ void SnakeGame::readValue() {
 }
 
 void SnakeGame::takeInput() {
-    thread th(&SnakeGame::readValue, this);
-    unique_lock<mutex> lck(mtx);
-    while (cv.wait_for(lck, chrono::milliseconds(speed)) == cv_status::timeout) gameControl();
+    std::thread th(&SnakeGame::readValue, this);
+    std::unique_lock<std::mutex> lck(mtx);
+    while (cv.wait_for(lck, std::chrono::milliseconds(speed)) == std::cv_status::timeout) gameControl();
     th.join();
     gameControl();
 }
@@ -165,7 +163,7 @@ void SnakeGame::gameAlgorithm() {
     if (bonus) {
         if (time_ < pulse) {
             map[frog] = '@';
-            cout << int(1.5 * side) - pulse + time_ << endl;
+            std::cout << int(1.5 * side) - pulse + time_ << std::endl;
         }
         if (time_ == pulse - int(1.5 * side)) {
             bonus = false;
@@ -174,15 +172,15 @@ void SnakeGame::gameAlgorithm() {
         }
     } else {
         time_ = pulse;
-        cout << endl;
+        std::cout << std::endl;
     }
     if (head == insect) {
-        cout << "\a";
+        std::cout << "\a";
         points += pace * level;
         score++;
     }
     if (head == frog) {
-        cout << "\a";
+        std::cout << "\a";
         points += pace * level * 3;
         bonus = false;
         frog = area + 1;
@@ -195,20 +193,20 @@ void SnakeGame::gameAlgorithm() {
 }
 
 void SnakeGame::gameDisplay() {
-    cout << points << endl << uline << endl;
+    std::cout << points << std::endl << uline << std::endl;
     for (vert = 0; vert < side; vert++) {
         for (horz = 0; horz < side; horz++) {
-            if (horz == side - 1 || horz == 0) cout << wall[level - 1];
-            if (horz == side - 1 && vert == side - 1) cout << endl << bline;
+            if (horz == side - 1 || horz == 0) std::cout << wall[level - 1];
+            if (horz == side - 1 && vert == side - 1) std::cout << std::endl << bline;
             switch (map[(vert * side) + horz]) {
-                case '<': cout << "◀"; break;
-                case '>': cout << "▶"; break;
-                case '^': cout << "▲"; break;
-                case 'v': cout << "▼"; break;
-                case '|': cout << "∥"; break;
-                default : cout << map[(vert * side) + horz];
+                case '<': std::cout << "◀"; break;
+                case '>': std::cout << "▶"; break;
+                case '^': std::cout << "▲"; break;
+                case 'v': std::cout << "▼"; break;
+                case '|': std::cout << "∥"; break;
+                default : std::cout << map[(vert * side) + horz];
             }
-        } cout << endl;
+        } std::cout << std::endl;
     }
 }
 
@@ -216,9 +214,9 @@ void SnakeGame::gameToggle(bool toggle) {
     if (toggle) takeInput();
     else {
         clearConsole();
-        fileManage(to_string(pace) + to_string(level) + to_string(side), 's');
-        fileManage(to_string(points), 'o');
-        cout << "Game Over!\nScore:" << points << "\n";
+        fileManage(std::to_string(pace) + std::to_string(level) + std::to_string(side), 's');
+        fileManage(std::to_string(points), 'o');
+        std::cout << "Game Over!\nScore:" << points << "\n";
         exit(0);
     }
     gameToggle(true);
@@ -235,30 +233,30 @@ void SnakeGame::speedSelector() {
 void SnakeGame::mainMenu() {
     char choice = 'z';
     mazeBuilder();
-    cout << "\nPress:\n1 to Play\n2 for Help\n3 for Game Settings\n4 to exit\n";
-    cin >> choice;
+    std::cout << "\nPress:\n1 to Play\n2 for Help\n3 for Game Settings\n4 to exit\n";
+    std::cin >> choice;
     clearConsole();
     if (choice == '1') gameToggle(true);
     if (choice == '2') {
-        cout << "CONTROLS\nPRESS\n w TO MOVE UPWARD\n s TO MOVE DOWNWARDS \n d TO MOVE RIGHT \n a TO MOVE LEFT\n t TO QUIT THE GAME\n";
+        std::cout << "CONTROLS\nPRESS\n w TO MOVE UPWARD\n s TO MOVE DOWNWARDS \n d TO MOVE RIGHT \n a TO MOVE LEFT\n t TO QUIT THE GAME\n";
         sleep(3);
         run();
     }
     if (choice == '3') {
-        string value_entered;
-        cout << "Control the Snake speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard\n";
-        cin >> value_entered;
+        std::string value_entered;
+        std::cout << "Control the Snake speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard\n";
+        std::cin >> value_entered;
         if(all_of(value_entered.begin(),value_entered.end(),::isdigit)) pace = stoi(value_entered);
-        cout << "Control the Game difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2\n3 : LEVEL 3\n";
-        cin >> value_entered;
+        std::cout << "Control the Game difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2\n3 : LEVEL 3\n";
+        std::cin >> value_entered;
         if(all_of(value_entered.begin(),value_entered.end(),::isdigit)) level = stoi(value_entered);
         speedSelector();
-        cout << "Enter the map size of range[10-15]\n";
-        cin >> value_entered;
+        std::cout << "Enter the map size of range[10-15]\n";
+        std::cin >> value_entered;
         if(all_of(value_entered.begin(),value_entered.end(),::isdigit)) {
             int num = stoi(value_entered);
             if(num > 9 && num < 16) side = num;
-            else cout<<"Size entered not within range!\nReverting to previous size...\n";
+            else std::cout<<"Size entered not within range!\nReverting to previous size...\n";
             initialize();
             sleep(2);
         }
@@ -269,12 +267,12 @@ void SnakeGame::mainMenu() {
 }
 
 void SnakeGame::handleFileStatus() {
-    cout << "The save file is corrupted! \nKindly restart the game as the save file is reset\n";
-    ofstream fout(saveFileName, ios::app);
-    fout << endl << "22140";
+    std::cout << "The save file is corrupted! \nKindly restart the game as the save file is reset\n";
+    std::ofstream fout(saveFileName, std::ios::app);
+    fout << std::endl << "22140";
     fout.close();
     sleep(1);
-    cout << "Terminating..\n";
+    std::cout << "Terminating..\n";
 }
 
 void SnakeGame::mazeBuilder()
@@ -286,15 +284,15 @@ void SnakeGame::mazeBuilder()
         }
     }
 }
-void SnakeGame::fileManage(string data, char option) {
+void SnakeGame::fileManage(std::string data, char option) {
     if (option == 'i') {
-        ifstream fin(saveFileName);
+        std::ifstream fin(saveFileName);
         if (!fin) {
-            cout << "Welcome to the game!";
+            std::cout << "Welcome to the game!";
             initialize();
         }
         else {
-            string save_data;
+            std::string save_data;
             while (fin.good()) getline(fin, save_data);
             if (save_data.size() < 5 || save_data.size() > 8 || !all_of(save_data.begin(), save_data.end(), ::isdigit)) {
                 handleFileStatus();
@@ -308,19 +306,19 @@ void SnakeGame::fileManage(string data, char option) {
             side+= save_data[3] - '0';
             initialize();
             if (highscore < stoi(save_data.substr(4))) highscore = stoi(save_data.substr(4));
-            cout << "Welcome back to the game!\nThe highscore is " << highscore;
+            std::cout << "Welcome back to the game!\nThe highscore is " << highscore;
             speedSelector();
         }
         fin.close();
     } else if (option == 's') {
-        ofstream fout(saveFileName, ios::app);
-        fout << endl << data;
+        std::ofstream fout(saveFileName, std::ios::app);
+        fout << std::endl << data;
         fout.close();
     } else if (option == 'o') {
-        ofstream fout(saveFileName, ios::app);
+        std::ofstream fout(saveFileName, std::ios::app);
         if (stoi(data) > highscore) {
             highscore = stoi(data);
-            cout << "HIGHSCORE! " << endl;
+            std::cout << "HIGHSCORE! " << std::endl;
         }
         fout << highscore;
         fout.close();
