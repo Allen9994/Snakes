@@ -14,12 +14,12 @@
 
 class SnakeGame {
 private:
-    short horz, vert, score, highscore, points, speed, level, pace, head, side, area;
-    short index, prevScore, insect, frog, time_, headShape, bodyShape, pulse;
+    short horz, vert, score, highscore, points, speed, level, pace, side, area;
+    short head, index, prevScore, insect, frog, time_, headShape, bodyShape, pulse;
     char keyPressed, value, wall[3];
     std::vector<short> location, trail;
     std::string saveFileName, map, bline, uline;
-    bool flag, bonus;
+    bool bonus;
 
     std::mutex mtx;
     std::condition_variable cv;
@@ -41,10 +41,10 @@ private:
 
 public:
     SnakeGame() 
-        : score(0), highscore(0), points(0), speed(400), level(2), pace(2), head(0), 
-          keyPressed(' '), value('d'), wall{':', '|','|'}, side(14), area(0), trail(1, 0), 
-          prevScore(0), insect(0), frog(0), time_(0), headShape(0), bodyShape(0), pulse(0),
-          saveFileName("snakes_data.txt"), flag(false), bonus(false){}
+        : score(0), highscore(0), points(0), speed(400), level(2), pace(2),  
+          keyPressed(' '), value('d'), wall{':', '|','|'}, side(14), area(0),  
+          trail(1, 0), head(0),insect(0), frog(0), time_(0), headShape(0), bodyShape(0), 
+          prevScore(-1), pulse(0), saveFileName("snakes_data.txt"), bonus(false){}
 
     void run() {
         clearConsole();
@@ -55,7 +55,7 @@ public:
 
 void SnakeGame::hitWall() {
     if (level == 1) {
-        if (head >= area) head -= area;
+        if (head >= area)  head -= area;
         else if (head < 0) head += area;
         else if (head%side == side-1 && value == 'd') head = (head - side) + 1;
         else if (head%side == side-1 && value == 'a') head = (head + side) - 1;
@@ -65,10 +65,10 @@ void SnakeGame::hitWall() {
     } 
     if (level == 3) {
         if (head%side == side-1 || head >= area || head < 0) gameToggle(false);
-        if(head/side > (side/5) && head%side == (side/2)-1 && 
-        head/side < (0.8*side)) gameToggle(false);
-        if(head%side > (side/5)-1 && head/side == side/2 && 
-        head%side < (0.8*side)-1) gameToggle(false);
+        if (head/side > (side/5) && head%side == (side/2)-1 && 
+            head/side < (0.8*side)) gameToggle(false);
+        if (head%side > (side/5)-1 && head/side == side/2 && 
+            head%side < (0.8*side)-1) gameToggle(false);
     }
 }
 
@@ -117,9 +117,9 @@ void SnakeGame::takeInput() {
 
 void SnakeGame::gameControl() {
     switch (value) {
-        case 'd': head ++;       break;
+        case 'd': head ++;      break;
         case 's': head += side; break;
-        case 'a': head --;       break;
+        case 'a': head --;      break;
         case 'w': head -= side; break;
     }
     gameAlgorithm();
@@ -128,10 +128,7 @@ void SnakeGame::gameControl() {
 void SnakeGame::gameAlgorithm() {
     clearConsole();
     hitWall();
-    if (prevScore != score) flag = false;
-    prevScore = score;
-    if (!flag) {
-        flag = true;
+    if (prevScore != score) {
         insect = location[score % (area / 2)];
         if ((insect + 1) % side == 0) insect++;
         if (score % 4 == 3 && !bonus) {
@@ -140,6 +137,7 @@ void SnakeGame::gameAlgorithm() {
             bonus = true;
         }
     }
+    prevScore = score;
     if (find(trail.begin(), trail.end(), head) != trail.end()) gameToggle(false);
     trail.push_back(head);
     ++ pulse;
