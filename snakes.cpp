@@ -84,7 +84,7 @@ void SnakeGame::initialize() {
     for (index = 0; index < area / 2; index++) {
         if (level == 3) {
             loc = rand() % (area - 2) + 1;
-            while(loc / side > side / 5 && loc % side == (side / 2)-1 && loc / side < 0.8 * side ||
+            while (loc / side > side / 5 && loc % side == (side / 2)-1 && loc / side < 0.8 * side ||
             (loc % side > (side / 5)-1 && loc / side == side / 2 && loc % side < (0.8 * side)-1)) loc = rand() % (area - 2) + 1;
             location.push_back(loc);
         } else location.push_back(rand() % (area - 2) + 1);
