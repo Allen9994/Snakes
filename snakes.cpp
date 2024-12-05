@@ -128,7 +128,6 @@ void SnakeGame::gameControl() {
     gameAlgorithm();
 }
 void SnakeGame::mapSnake() {
-    
     if (headShape == bodyShape + 1) {
         map[head - 1] = '=';
         map[head] = '>';
