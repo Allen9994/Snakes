@@ -249,16 +249,16 @@ void SnakeGame::mainMenu() {
         std::string value_entered;
         std::cout << "Control the Snake speed. PRESS\n1 : Easy\n2 : Medium\n3 : Hard\n";
         std::cin >> value_entered;
-        if(all_of(value_entered.begin(),value_entered.end(),::isdigit)) pace = stoi(value_entered);
+        if (all_of(value_entered.begin(),value_entered.end(),::isdigit)) pace = stoi(value_entered);
         std::cout << "Control the Game difficulty level. PRESS\n1 : LEVEL 1\n2 : LEVEL 2\n3 : LEVEL 3\n";
         std::cin >> value_entered;
-        if(all_of(value_entered.begin(),value_entered.end(),::isdigit)) level = stoi(value_entered);
+        if (all_of(value_entered.begin(),value_entered.end(),::isdigit)) level = stoi(value_entered);
         speedSelector();
         std::cout << "Enter the map size of range[10-15]\n";
         std::cin >> value_entered;
-        if(all_of(value_entered.begin(),value_entered.end(),::isdigit)) {
+        if (all_of(value_entered.begin(),value_entered.end(),::isdigit)) {
             int num = stoi(value_entered);
-            if(num > 9 && num < 16) side = num;
+            if (num > 9 && num < 16) side = num;
             else std::cout<<"Size entered not within range[10-15]!\nReverting to previous size...\n";
             initialize();
             sleep(2);
@@ -282,8 +282,8 @@ void SnakeGame::mazeBuilder()
 {
     if (level == 3) {
         for(index = 0; index < map.size(); index++) {
-            if(index/side > side/5 && index%side == (side/2)-1 && index/side < (0.8*side)) map[index] = '|';
-            if(index%side > (side/5)-1 && index/side == side/2 && index%side < (0.8*side)-1) map[index] = '-';
+            if (index/side > side/5 && index%side == (side/2)-1 && index/side < (0.8*side)) map[index] = '|';
+            if (index%side > (side/5)-1 && index/side == side/2 && index%side < (0.8*side)-1) map[index] = '-';
         }
     }
 }
