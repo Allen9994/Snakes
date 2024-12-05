@@ -272,7 +272,7 @@ void SnakeGame::mainMenu() {
 
 void SnakeGame::handleFileStatus() {
     std::cout << "The save file is corrupted! \nKindly restart the game as the save file is reset\n";
-    std::ofstream fout(saveFileName, std::ios::app);
+    std::ofstream fout(saveFileName, std::ios::app | std::ios::binary);
     fout << std::endl << "22140";
     fout.close();
     sleep(1);
@@ -290,7 +290,7 @@ void SnakeGame::mazeBuilder()
 }
 void SnakeGame::fileManage(std::string data, char option) {
     if (option == 'i') {
-        std::ifstream fin(saveFileName);
+        std::ifstream fin(saveFileName,std::ios::binary);
         if (!fin) {
             std::cout << "Welcome to the game!";
             initialize();
@@ -316,11 +316,11 @@ void SnakeGame::fileManage(std::string data, char option) {
         }
         fin.close();
     } else if (option == 's') {
-        std::ofstream fout(saveFileName, std::ios::app);
+        std::ofstream fout(saveFileName, std::ios::app | std::ios::binary);
         fout << std::endl << data;
         fout.close();
     } else if (option == 'o') {
-        std::ofstream fout(saveFileName, std::ios::app);
+        std::ofstream fout(saveFileName, std::ios::app | std::ios::binary);
         if (stoi(data) > highscore) {
             highscore = stoi(data);
             std::cout << "HIGHSCORE! " << std::endl;
