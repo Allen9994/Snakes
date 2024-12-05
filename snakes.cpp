@@ -14,9 +14,10 @@
 
 class SnakeGame {
 private:
-    short horz, vert, score, highscore, points, speed, level, pace, side, area;
-    short head, index, prevScore, insect, frog, time_, headShape, bodyShape, pulse;
-    char keyPressed, value, wall[3];
+    short horz, vert, score, highscore, points, speed, level;
+    short head, index, prevScore, insect, frog, time_;
+    short pace, side, area, headShape, bodyShape, pulse;
+    char keyPress, value, wall[3];
     std::vector<short> location, trail;
     std::string saveFileName, map, bline, uline;
     bool bonus;
@@ -42,7 +43,7 @@ private:
 public:
     SnakeGame() 
         : score(0), highscore(0), points(0), speed(400), level(2), pace(2),  
-          keyPressed(' '), value('d'), wall{':', '|','|'}, side(14), area(0),  
+          keyPress(' '), value('d'), wall{':', '|','|'}, side(14), area(0),  
           trail(1, 0), head(0),insect(0), frog(0), time_(0), headShape(0), bodyShape(0), 
           prevScore(-1), pulse(0), saveFileName("snakes_data.txt"), bonus(false){}
 
@@ -81,13 +82,15 @@ void SnakeGame::initialize() {
     map = std::string(area, ' ');
     srand((unsigned) time(0));
     int loc;
-    for (index = 0; index < area / 2; index++) {
+    for (index = 0; index < area/2; index++) {
         if (level == 3) {
-            loc = rand() % (area - 2) + 1;
-            while (loc / side > side / 5 && loc % side == (side / 2)-1 && loc / side < 0.8 * side ||
-            (loc % side > (side / 5)-1 && loc / side == side / 2 && loc % side < (0.8 * side)-1)) loc = rand() % (area - 2) + 1;
+            loc = rand() % (area-2) + 1;
+            while (loc / side > side / 5 && loc % side == (side/2) - 1 && loc / side < 0.8*side ||
+            (loc % side > (side/5)-1 && loc / side == side / 2 && loc % side < (0.8*side) - 1)) {
+                loc = rand() % (area - 2) + 1;
+            }
             location.push_back(loc);
-        } else location.push_back(rand() % (area - 2) + 1);
+        } else location.push_back(rand() % (area-2) + 1);
     }
 }
 
@@ -97,13 +100,12 @@ void SnakeGame::readValue() {
     newt = oldt;
     newt.c_lflag &= ~(ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-    keyPressed = getchar();
-    if (keyPressed == 'w' || keyPressed == 's' || keyPressed == 'd' || keyPressed == 'a') value = keyPressed;
-    if (keyPressed == 't') gameToggle(false);
+    
+    keyPress = getchar();
+    if (keyPress == 'w' || keyPress == 's' || keyPress == 'd' || keyPress == 'a') value = keyPress;
+    if (keyPress == 't') gameToggle(false);
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-
     cv.notify_one();
 }
 
@@ -132,7 +134,7 @@ void SnakeGame::gameAlgorithm() {
         insect = location[score % (area / 2)];
         if ((insect + 1) % side == 0) insect++;
         if (score % 4 == 3 && !bonus) {
-            frog = location[(insect / 2) % (area / 2)];
+            frog = location[(insect/2) % (area/2)];
             if ((frog + 1) % side == 0) frog++;
             bonus = true;
         }
@@ -236,7 +238,8 @@ void SnakeGame::mainMenu() {
     clearConsole();
     if (choice == '1') gameToggle(true);
     if (choice == '2') {
-        std::cout << "CONTROLS\nPRESS\n w TO MOVE UPWARD\n s TO MOVE DOWNWARDS \n d TO MOVE RIGHT \n a TO MOVE LEFT\n t TO QUIT THE GAME\n";
+        std::cout << "CONTROLS\nPRESS\n w TO MOVE UPWARD\n s TO MOVE DOWNWARDS \n ";
+        std::cout << "d TO MOVE RIGHT \n a TO MOVE LEFT\n t TO QUIT THE GAME\n";
         sleep(3);
         run();
     }
@@ -277,8 +280,8 @@ void SnakeGame::mazeBuilder()
 {
     if (level == 3) {
         for(index = 0; index < map.size(); index++) {
-            if(index/side > side/5 && index%side == (side/2)-1 && index/side < (0.8 * side)) map[index] = '|';
-            if(index%side > (side/5)-1 && index/side == side/2 && index%side < (0.8 * side)-1) map[index] = '-';
+            if(index/side > side/5 && index%side == (side/2)-1 && index/side < (0.8*side)) map[index] = '|';
+            if(index%side > (side/5)-1 && index/side == side/2 && index%side < (0.8*side)-1) map[index] = '-';
         }
     }
 }
@@ -292,7 +295,8 @@ void SnakeGame::fileManage(std::string data, char option) {
         else {
             std::string save_data;
             while (fin.good()) getline(fin, save_data);
-            if (save_data.size() < 5 || save_data.size() > 8 || !all_of(save_data.begin(), save_data.end(), ::isdigit)) {
+            if (save_data.size() < 5 || save_data.size() > 8 
+                    || !all_of(save_data.begin(), save_data.end(), ::isdigit)) {
                 handleFileStatus();
                 fin.close();
                 exit(0);
