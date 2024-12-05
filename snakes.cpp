@@ -30,6 +30,7 @@ private:
     void readValue();
     void takeInput();
     void gameControl();
+    void mapSnake();
     void gameAlgorithm();
     void gameDisplay();
     void gameToggle(bool);
@@ -45,7 +46,7 @@ public:
         : score(0), highscore(0), points(0), speed(400), level(2), pace(2),  
           keyPress(' '), value('d'), wall{':', '|','|'}, side(14), area(0),  
           trail(1, 0), head(0),insect(0), frog(0), time_(0), headShape(0), bodyShape(0), 
-          prevScore(-1), pulse(0), saveFileName("snakes_data.txt"), bonus(false){}
+          prevScore(-1), pulse(0), saveFileName("snakes_data.dat"), bonus(false){}
 
     void run() {
         clearConsole();
@@ -126,7 +127,23 @@ void SnakeGame::gameControl() {
     }
     gameAlgorithm();
 }
-
+void SnakeGame::mapSnake() {
+    
+    if (headShape == bodyShape + 1) {
+        map[head - 1] = '=';
+        map[head] = '>';
+    } else if (headShape == bodyShape - 1) {
+        map[head + 1] = '=';
+        map[head] = '<';
+    } else if (headShape / side == (bodyShape / side) + 1) {
+        map[head - side] = '|';
+        map[head] = 'v';
+    } else if (headShape / side == (bodyShape / side) - 1) {
+        map[head + side] = '|';
+        map[head] = '^';
+    }
+    map[insect] = '+';
+}
 void SnakeGame::gameAlgorithm() {
     clearConsole();
     hitWall();
@@ -145,21 +162,7 @@ void SnakeGame::gameAlgorithm() {
     ++ pulse;
     headShape = trail[trail.size() - 1];
     bodyShape = trail[trail.size() - 2];
-
-    if (headShape == bodyShape + 1) {
-        map[head - 1] = '=';
-        map[head] = '>';
-    } else if (headShape == bodyShape - 1) {
-        map[head + 1] = '=';
-        map[head] = '<';
-    } else if (headShape / side == (bodyShape / side) + 1) {
-        map[head - side] = '|';
-        map[head] = 'v';
-    } else if (headShape / side == (bodyShape / side) - 1) {
-        map[head + side] = '|';
-        map[head] = '^';
-    }
-    map[insect] = '+';
+    mapSnake();
     if (bonus) {
         if (time_ < pulse) {
             map[frog] = '@';
