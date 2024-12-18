@@ -12,12 +12,20 @@
 #include <unistd.h>
 #include <ctime>
 
+#define  HIGH_SPEED 550
+#define  MED_SPEED  400
+#define  LOW_SPEED  250
+#define  MIN_MAP_SIZE 9
+#define  MAX_MAP_SIZE 16
+#define  FILE_RESET_VAL 22140
+#define  SAVE_FILE_NAME "snakes_data.dat"
+
 class SnakeGame {
 private:
     short horz, vert, score, highscore, points, speed, level;
     short head, index, prevScore, insect, frog, time_;
     short pace, side, area, headShape, bodyShape, pulse;
-    char keyPress, value, wall[3];
+    char value, wall[3];
     std::vector<short> location, trail;
     std::string saveFileName, map, bline, uline;
     bool bonus;
@@ -43,10 +51,10 @@ private:
 
 public:
     SnakeGame() 
-        : score(0), highscore(0), points(0), speed(400), level(2), pace(2),  
-          keyPress(' '), value('d'), wall{':', '|','|'}, side(14), area(0),  
-          trail(1, 0), head(0),insect(0), frog(0), time_(0), headShape(0), bodyShape(0), 
-          prevScore(-1), pulse(0), saveFileName("snakes_data.dat"), bonus(false){}
+        : score(0), highscore(0), points(0), speed(MED_SPEED), level(2), pace(2),  
+          trail(1, 0), value('d'), wall{':', '|','|'}, side(14), area(0),  
+          head(0),insect(0), frog(0), time_(0), headShape(0), bodyShape(0), 
+          prevScore(-1), pulse(0), saveFileName(SAVE_FILE_NAME), bonus(false){}
 
     void run() {
         clearConsole();
@@ -59,8 +67,8 @@ void SnakeGame::hitWall() {
     if (level == 1) {
         if (head >= area)  head -= area;
         else if (head < 0) head += area;
-        else if (head%side == side-1 && value == 'd') head = (head - side) + 1;
-        else if (head%side == side-1 && value == 'a') head = (head + side) - 1;
+        else if (head%side == side-1 && value == 'd') head = (head - side)+1;
+        else if (head%side == side-1 && value == 'a') head = (head + side)-1;
     }
     if (level == 2) {
         if (head%side == side-1 || head >= area || head < 0) gameToggle(false);
@@ -97,13 +105,15 @@ void SnakeGame::initialize() {
 
 void SnakeGame::readValue() {
     static struct termios oldt, newt;
+    static char keyPress = ' ';
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
     newt.c_lflag &= ~(ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    
     keyPress = getchar();
-    if (keyPress == 'w' || keyPress == 's' || keyPress == 'd' || keyPress == 'a') value = keyPress;
+    if (keyPress == 'w' || keyPress == 's' || keyPress == 'd' || keyPress == 'a') {
+        value = keyPress;
+    }
     if (keyPress == 't') gameToggle(false);
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
@@ -113,7 +123,9 @@ void SnakeGame::readValue() {
 void SnakeGame::takeInput() {
     std::thread th(&SnakeGame::readValue, this);
     std::unique_lock<std::mutex> lck(mtx);
-    while (cv.wait_for(lck, std::chrono::milliseconds(speed)) == std::cv_status::timeout) gameControl();
+    while (cv.wait_for(lck, std::chrono::milliseconds(speed)) == std::cv_status::timeout) {
+        gameControl();
+    }
     th.join();
     gameControl();
 }
@@ -226,9 +238,9 @@ void SnakeGame::gameToggle(bool toggle) {
 
 void SnakeGame::speedSelector() {
     switch (pace) {
-        case 1: speed = 550; break;
-        case 3: speed = 250; break;
-        default:speed = 400; pace = 2; break;
+        case 1: speed = HIGH_SPEED; break;
+        case 3: speed = LOW_SPEED; break;
+        default:speed = MED_SPEED; pace = 2; break;
     }
 }
 
@@ -258,7 +270,7 @@ void SnakeGame::mainMenu() {
         std::cin >> value_entered;
         if (all_of(value_entered.begin(),value_entered.end(),::isdigit)) {
             int num = stoi(value_entered);
-            if (num > 9 && num < 16) side = num;
+            if (num > MIN_MAP_SIZE && num < MAX_MAP_SIZE) side = num;
             else std::cout<<"Size entered not within range[10-15]!\nReverting to previous size...\n";
             initialize();
             sleep(2);
@@ -272,7 +284,7 @@ void SnakeGame::mainMenu() {
 void SnakeGame::handleFileStatus() {
     std::cout << "The save file is corrupted! \nKindly restart the game as the save file is reset\n";
     std::ofstream fout(saveFileName, std::ios::app | std::ios::binary);
-    fout << std::endl << "22140";
+    fout << std::endl << FILE_RESET_VAL;
     fout.close();
     sleep(1);
     std::cout << "Terminating..\n";
@@ -282,8 +294,12 @@ void SnakeGame::mazeBuilder()
 {
     if (level == 3) {
         for(index = 0; index < map.size(); index++) {
-            if (index/side > side/5 && index%side == (side/2)-1 && index/side < (0.8*side)) map[index] = '|';
-            if (index%side > (side/5)-1 && index/side == side/2 && index%side < (0.8*side)-1) map[index] = '-';
+            if (index/side > side/5 && index%side == (side/2)-1 && index/side < (0.8*side)) {
+                map[index] = '|';
+            }
+            if (index%side > (side/5)-1 && index/side == side/2 && index%side < (0.8*side)-1) {
+                map[index] = '-';
+            }
         }
     }
 }
