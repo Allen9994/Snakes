@@ -12,9 +12,9 @@
 #include <unistd.h>
 #include <ctime>
 
-#define  HIGH_SPEED 550
+#define  LOW_SPEED  550
 #define  MED_SPEED  400
-#define  LOW_SPEED  250
+#define  HIGH_SPEED 250
 #define  MIN_MAP_SIZE 9
 #define  MAX_MAP_SIZE 16
 #define  FILE_RESET_VAL 22140
@@ -238,8 +238,8 @@ void SnakeGame::gameToggle(bool toggle) {
 
 void SnakeGame::speedSelector() {
     switch (pace) {
-        case 1: speed = HIGH_SPEED; break;
-        case 3: speed = LOW_SPEED; break;
+        case 1: speed = LOW_SPEED; break;
+        case 3: speed = HIGH_SPEED; break;
         default:speed = MED_SPEED; pace = 2; break;
     }
 }
